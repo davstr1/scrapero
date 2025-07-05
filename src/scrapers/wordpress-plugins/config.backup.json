@@ -19,11 +19,11 @@
   },
   "pagination": {
     "nextButtonSelector": "a.next.page-numbers",
-    "maxPages": 1000
+    "maxPages": 35
   },
-  "maxRequestsPerCrawl": 5000,
-  "maxConcurrency": 10,
-  "requestHandlerTimeoutSecs": 600,
+  "maxRequestsPerCrawl": 750,
+  "maxConcurrency": 3,
+  "requestHandlerTimeoutSecs": 300,
   "outputs": [
     {
       "type": "csv",
@@ -41,12 +41,11 @@
     "batchSize": 50
   },
   "proxy": {
-    "enabled": true,
-    "url": "http://sxbrfiav:z1rnitsp7b1x@82.25.216.29:6871/",
-    "rotation": "request"
+    "enabled": false,
+    "rotation": "session"
   },
   "rateLimit": {
-    "requestsPerMinute": 120,
-    "delayBetweenRequests": 500
+    "requestsPerMinute": 15,
+    "delayBetweenRequests": 4000
   }
 }
