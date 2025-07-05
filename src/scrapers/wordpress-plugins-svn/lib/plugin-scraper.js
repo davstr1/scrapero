@@ -175,7 +175,7 @@ class PluginScraper {
       name: this.extractText($, this.selectors.pluginName),
       url: url,
       author: this.extractAuthor($),
-      description: this.extractText($, this.selectors.shortDescription).replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim(),
+      description: this.extractShortDescription($),
       rating: this.extractRating($),
       ratingCount: this.extractRatingCount($),
       rating5Star: this.extractText($, this.selectors.ratingBreakdown['5star']),
@@ -220,6 +220,26 @@ class PluginScraper {
     return '';
   }
 
+  extractShortDescription($) {
+    // Get the first paragraph of content, but remove the "Description" heading
+    const description = this.extractText($, this.selectors.shortDescription);
+    
+    // Remove "Description" if it's at the beginning
+    const cleaned = description
+      .replace(/^Description\s*/i, '')
+      .replace(/\n+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    
+    // Take only the first sentence or up to 200 characters
+    const firstSentence = cleaned.match(/^[^.!?]+[.!?]/);
+    if (firstSentence) {
+      return firstSentence[0].trim();
+    }
+    
+    return cleaned.substring(0, 200).trim();
+  }
+
   extractAuthor($) {
     // Try to find author in the byline
     const bylineText = $('.wp-block-wporg-plugin-byline').text();
@@ -245,9 +265,25 @@ class PluginScraper {
   }
 
   extractRating($) {
-    const ratingText = $('.wporg-ratings').text();
-    const match = ratingText.match(/(\d+(?:\.\d+)?)\s+out of/);
-    return match ? parseFloat(match[1]) : 0;
+    // Try multiple selectors
+    const selectors = [
+      '.wporg-ratings-stars__label',
+      '.wporg-ratings',
+      '.rating'
+    ];
+    
+    for (const selector of selectors) {
+      const element = $(selector);
+      if (element.length) {
+        const text = element.text();
+        const match = text.match(/(\d+(?:\.\d+)?)/);
+        if (match) {
+          return parseFloat(match[1]);
+        }
+      }
+    }
+    
+    return 0;
   }
 
   extractRatingCount($) {
@@ -257,24 +293,50 @@ class PluginScraper {
   }
 
   extractActiveInstalls($) {
-    // Try multiple locations
-    const possibleTexts = [
-      $('.plugin-meta').text(),
-      $('.wp-block-wporg-plugin-meta').text(),
-      $('body').text()
-    ];
+    // Find in the meta section
+    const metaSection = $('section').last();
+    const metaText = metaSection.text();
     
-    for (const text of possibleTexts) {
-      // Look for patterns like "10+ active installations" or "1 million+ active installations"
-      const match = text.match(/(\d+(?:,\d+)*(?:\.\d+)?)\s*(?:million)?\+?\s*active\s*install/i);
-      
-      if (match) {
-        let count = match[1].replace(/,/g, '');
-        if (text.toLowerCase().includes('million')) {
-          count = parseFloat(count) * 1000000;
-        }
-        return parseInt(count);
+    // First try to find in list items
+    const listItems = metaSection.find('li');
+    let activeInstallsText = '';
+    
+    listItems.each((i, el) => {
+      const text = $(el).text();
+      if (text.toLowerCase().includes('active installation')) {
+        // Get the HTML to preserve structure
+        activeInstallsText = $(el).html() || text;
+        return false;
       }
+    });
+    
+    if (!activeInstallsText) {
+      // Fallback to searching in full text
+      const match = metaText.match(/Active\s+installations?\s+([^<\n]+)/i);
+      if (match) {
+        activeInstallsText = match[1];
+      }
+    }
+    
+    // Parse the number
+    if (activeInstallsText) {
+      // Handle different formats: "10+", "1,000+", "10,000+", "1+ million", "6+ million", etc.
+      let cleanText = activeInstallsText.trim();
+      
+      // Extract the strong tag content if present
+      const strongMatch = cleanText.match(/<strong>([^<]+)<\/strong>/);
+      if (strongMatch) {
+        cleanText = strongMatch[1];
+      }
+      
+      if (cleanText.toLowerCase().includes('million')) {
+        const num = parseFloat(cleanText.match(/(\d+(?:\.\d+)?)/)?.[1] || '0');
+        return Math.floor(num * 1000000);
+      }
+      
+      // Remove + and commas, then parse
+      const num = cleanText.replace(/[+,]/g, '').match(/(\d+)/);
+      return num ? parseInt(num[1]) : 0;
     }
     
     return 0;
@@ -395,23 +457,55 @@ class PluginScraper {
 
   extractTags($) {
     const tags = [];
-    $('.wp-block-post-tags a').each((i, el) => {
-      const tag = $(el).text().trim();
-      if (tag) {
-        tags.push(tag);
+    
+    // Try multiple selectors for tags
+    const selectors = [
+      '.tags a',
+      '.plugin-tags a',
+      '.wp-block-post-tags a',
+      'a[rel="tag"]'
+    ];
+    
+    for (const selector of selectors) {
+      const elements = $(selector);
+      if (elements.length > 0) {
+        elements.each((i, el) => {
+          const tag = $(el).text().trim();
+          if (tag && !tags.includes(tag)) {
+            tags.push(tag);
+          }
+        });
+        break;
       }
-    });
+    }
+    
     return tags.join(', ');
   }
 
   extractContributors($) {
     const contributors = [];
-    $('.contributors a').each((i, el) => {
-      const contributor = $(el).text().trim();
-      if (contributor) {
-        contributors.push(contributor);
+    
+    // Try multiple selectors
+    const selectors = [
+      '#contributors-list a',
+      '.contributors-list a',
+      '.plugin-contributors a',
+      '.contributors a'
+    ];
+    
+    for (const selector of selectors) {
+      const elements = $(selector);
+      if (elements.length > 0) {
+        elements.each((i, el) => {
+          const contributor = $(el).text().trim();
+          if (contributor && !contributors.includes(contributor)) {
+            contributors.push(contributor);
+          }
+        });
+        break;
       }
-    });
+    }
+    
     return contributors.join(', ');
   }
 
@@ -422,8 +516,9 @@ class PluginScraper {
 
   extractExtendedDescription($) {
     const description = $('.entry-content').first().text().trim();
-    // Clean up newlines and limit to first 1000 characters
+    // Remove "Description" heading and clean up
     return description
+      .replace(/^Description\s*/i, '')
       .replace(/\n+/g, ' ')
       .replace(/\s+/g, ' ')
       .substring(0, 1000)
