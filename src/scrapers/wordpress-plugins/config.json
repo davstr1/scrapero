@@ -21,7 +21,7 @@
     "nextButtonSelector": ".pagination-links a.next",
     "maxPages": 2
   },
-  "maxRequestsPerCrawl": 5,
+  "maxRequestsPerCrawl": 25,
   "maxConcurrency": 2,
   "outputs": [
     {

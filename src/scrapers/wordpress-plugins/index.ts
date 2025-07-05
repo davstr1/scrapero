@@ -201,7 +201,8 @@ export default class WordpressPluginsScraper extends BaseScraper {
       }
     }
 
-    return plugins;
+    // Don't return listing data - it will be enriched and returned from detail pages
+    return [];
   }
 
   private async extractDetailPageData(context: any): Promise<any> {
