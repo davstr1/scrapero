@@ -160,449 +160,464 @@ module.exports = {
 
 ## Core Implementation
 
-### 1. Type-Safe Configuration
-**src/core/config.ts**
+### 1. Core Types and Interfaces
+**src/core/result.ts**
 ```typescript
+import { Result, ok, err, Ok, Err } from 'neverthrow';
+
+export { Result, ok, err, Ok, Err };
+export type AsyncResult<T, E = Error> = Promise<Result<T, E>>;
+
+// Helper to convert Promise to Result
+export async function fromPromise<T>(
+  promise: Promise<T>,
+  errorFn?: (e: unknown) => Error
+): AsyncResult<T> {
+  try {
+    const value = await promise;
+    return ok(value);
+  } catch (e) {
+    return err(errorFn ? errorFn(e) : new Error(String(e)));
+  }
+}
+```
+
+**src/core/plugin.ts**
+```typescript
+import { Result } from 'neverthrow';
 import { z } from 'zod';
+import { Context } from './context';
+
+export interface PluginMetadata {
+  name: string;
+  version: string;
+  type: 'extractor' | 'output' | 'transform' | 'validator';
+  description?: string;
+  configSchema?: z.ZodSchema;
+}
+
+export interface Plugin<TConfig = any, TInput = any, TOutput = any> {
+  metadata: PluginMetadata;
+  
+  initialize?(config: TConfig): Promise<Result<void, Error>>;
+  execute(input: TInput, context: Context): Promise<Result<TOutput, Error>>;
+  cleanup?(): Promise<void>;
+}
+
+export interface PluginFactory<TConfig = any> {
+  create(config: TConfig): Plugin;
+}
+```
+
+**src/core/context.ts**
+```typescript
+import winston from 'winston';
+import { injectable } from 'tsyringe';
+
+@injectable()
+export class Context {
+  private data = new Map<string, any>();
+  
+  constructor(
+    public readonly logger: winston.Logger,
+    public readonly requestId: string = crypto.randomUUID()
+  ) {}
+  
+  set<T>(key: string, value: T): void {
+    this.data.set(key, value);
+  }
+  
+  get<T>(key: string): T | undefined {
+    return this.data.get(key);
+  }
+  
+  has(key: string): boolean {
+    return this.data.has(key);
+  }
+  
+  child(meta: Record<string, any>): Context {
+    const childLogger = this.logger.child({ ...meta, requestId: this.requestId });
+    const childContext = new Context(childLogger, this.requestId);
+    
+    // Copy parent data
+    this.data.forEach((value, key) => {
+      childContext.set(key, value);
+    });
+    
+    return childContext;
+  }
+}
+```
+
+**src/core/pipeline.ts**
+```typescript
 import { Result, ok, err } from 'neverthrow';
-import * as fs from 'fs/promises';
-import * as path from 'path';
+import { Plugin } from './plugin';
+import { Context } from './context';
 
-// Define schemas for type safety and validation
-export const SelectorSchema = z.record(z.string());
+export interface PipelineStep {
+  plugin: Plugin;
+  name: string;
+}
 
-export const PaginationSchema = z.object({
-  nextButtonSelector: z.string().optional(),
-  maxPages: z.number().positive().optional(),
-  waitBetweenPages: z.number().default(1000)
-});
-
-export const RateLimitSchema = z.object({
-  requestsPerMinute: z.number().positive().default(30),
-  concurrent: z.number().positive().default(1)
-});
-
-export const OutputConfigSchema = z.discriminatedUnion('type', [
-  z.object({
-    type: z.literal('csv'),
-    enabled: z.boolean().default(true),
-    options: z.object({
-      path: z.string(),
-      headers: z.boolean().default(true),
-      delimiter: z.string().default(',')
-    })
-  }),
-  z.object({
-    type: z.literal('database'),
-    enabled: z.boolean().default(true),
-    options: z.object({
-      connection: z.string(),
-      table: z.string(),
-      upsert: z.boolean().default(false),
-      batchSize: z.number().default(100)
-    })
-  }),
-  z.object({
-    type: z.literal('s3'),
-    enabled: z.boolean().default(true),
-    options: z.object({
-      bucket: z.string(),
-      keyPrefix: z.string(),
-      format: z.enum(['json', 'csv']).default('json')
-    })
-  })
-]);
-
-export const ScraperConfigSchema = z.object({
-  name: z.string().min(1),
-  baseUrl: z.string().url(),
-  crawlerType: z.enum(['playwright', 'cheerio']).default('cheerio'),
-  selectors: SelectorSchema,
-  pagination: PaginationSchema.optional(),
-  rateLimit: RateLimitSchema,
-  outputs: z.array(OutputConfigSchema),
-  retries: z.object({
-    maxAttempts: z.number().default(3),
-    backoff: z.enum(['exponential', 'linear']).default('exponential')
-  }).default({})
-});
-
-export type ScraperConfig = z.infer<typeof ScraperConfigSchema>;
-
-// Config loader with validation
-export class ConfigLoader {
-  static async load(configPath: string): Promise<Result<ScraperConfig, Error>> {
-    try {
-      const content = await fs.readFile(configPath, 'utf-8');
-      const rawConfig = JSON.parse(content);
+export class Pipeline {
+  private steps: PipelineStep[] = [];
+  
+  add(name: string, plugin: Plugin): this {
+    this.steps.push({ name, plugin });
+    return this;
+  }
+  
+  async execute<T>(input: T, context: Context): Promise<Result<T, Error>> {
+    let current = input;
+    
+    for (const step of this.steps) {
+      const stepContext = context.child({ step: step.name });
+      stepContext.logger.debug('Executing pipeline step', { step: step.name });
       
-      const result = ScraperConfigSchema.safeParse(rawConfig);
-      if (!result.success) {
-        return err(new Error(`Invalid config: ${result.error.message}`));
+      const result = await step.plugin.execute(current, stepContext);
+      if (result.isErr()) {
+        return err(new Error(`Pipeline failed at ${step.name}: ${result.error.message}`));
       }
       
-      return ok(result.data);
+      current = result.value;
+    }
+    
+    return ok(current);
+  }
+}
+```
+
+**src/core/types.ts**
+```typescript
+export interface ScrapedData {
+  url: string;
+  timestamp: Date;
+  data: Record<string, any>;
+  metadata?: Record<string, any>;
+}
+
+export interface Selector {
+  selector: string;
+  attribute?: string;
+  transform?: (value: string) => any;
+}
+
+export interface ExtractorConfig {
+  selectors: Record<string, Selector | string>;
+  waitForSelector?: string;
+  timeout?: number;
+}
+```
+
+### 2. Plugin System Implementation
+**src/runtime/registry.ts**
+```typescript
+import { injectable, singleton } from 'tsyringe';
+import { Plugin, PluginFactory } from '@core/plugin';
+import { Result, ok, err } from 'neverthrow';
+
+@singleton()
+@injectable()
+export class PluginRegistry {
+  private plugins = new Map<string, PluginFactory>();
+  private instances = new Map<string, Plugin>();
+  
+  register(name: string, factory: PluginFactory): void {
+    this.plugins.set(name, factory);
+  }
+  
+  create(name: string, config?: any): Result<Plugin, Error> {
+    const factory = this.plugins.get(name);
+    if (!factory) {
+      return err(new Error(`Plugin not found: ${name}`));
+    }
+    
+    try {
+      const plugin = factory.create(config);
+      this.instances.set(name, plugin);
+      return ok(plugin);
     } catch (error) {
-      return err(new Error(`Failed to load config: ${error}`));
+      return err(new Error(`Failed to create plugin ${name}: ${error}`));
     }
   }
   
-  static async loadAll(dir: string): Promise<Result<ScraperConfig[], Error>> {
+  get(name: string): Plugin | undefined {
+    return this.instances.get(name);
+  }
+  
+  list(): string[] {
+    return Array.from(this.plugins.keys());
+  }
+}
+```
+
+**src/runtime/loader.ts**
+```typescript
+import { injectable } from 'tsyringe';
+import { PluginRegistry } from './registry';
+import { Result, ok, err } from 'neverthrow';
+import * as path from 'path';
+import * as fs from 'fs/promises';
+
+@injectable()
+export class PluginLoader {
+  constructor(private registry: PluginRegistry) {}
+  
+  async loadFromDirectory(dir: string): Promise<Result<void, Error>> {
     try {
-      const files = await fs.readdir(dir);
-      const configs: ScraperConfig[] = [];
+      const entries = await fs.readdir(dir, { withFileTypes: true });
       
-      for (const file of files) {
-        if (file.endsWith('.json')) {
-          const result = await this.load(path.join(dir, file));
-          if (result.isOk()) {
-            configs.push(result.value);
-          }
+      for (const entry of entries) {
+        if (entry.isDirectory()) {
+          const pluginPath = path.join(dir, entry.name);
+          await this.loadPlugin(pluginPath);
         }
       }
       
-      return ok(configs);
-    } catch (error) {
-      return err(new Error(`Failed to load configs: ${error}`));
-    }
-  }
-}
-```
-
-### 2. Error Handling with Result Types
-**src/core/errors.ts**
-```typescript
-import { Result, ok, err } from 'neverthrow';
-
-export class ScraperError extends Error {
-  constructor(
-    message: string,
-    public code: string,
-    public context?: Record<string, any>
-  ) {
-    super(message);
-    this.name = 'ScraperError';
-  }
-}
-
-export const ErrorCodes = {
-  CONFIG_INVALID: 'CONFIG_INVALID',
-  SELECTOR_NOT_FOUND: 'SELECTOR_NOT_FOUND',
-  NETWORK_ERROR: 'NETWORK_ERROR',
-  OUTPUT_FAILED: 'OUTPUT_FAILED',
-  RATE_LIMIT_EXCEEDED: 'RATE_LIMIT_EXCEEDED'
-} as const;
-
-// Utility functions for error handling
-export async function tryCatch<T>(
-  fn: () => Promise<T>,
-  errorCode: string
-): Promise<Result<T, ScraperError>> {
-  try {
-    const result = await fn();
-    return ok(result);
-  } catch (error) {
-    return err(new ScraperError(
-      error instanceof Error ? error.message : String(error),
-      errorCode,
-      { originalError: error }
-    ));
-  }
-}
-
-export function aggregateErrors(
-  results: Result<any, Error>[]
-): Result<any[], Error> {
-  const errors = results.filter(r => r.isErr());
-  if (errors.length > 0) {
-    const messages = errors.map(e => e.error.message).join('; ');
-    return err(new Error(`Multiple errors: ${messages}`));
-  }
-  return ok(results.map(r => r.value));
-}
-```
-
-### 3. Enhanced Logger
-**src/core/logger.ts**
-```typescript
-import winston from 'winston';
-
-export class Logger {
-  private static instances = new Map<string, winston.Logger>();
-  
-  static create(name: string, meta?: Record<string, any>): winston.Logger {
-    if (!this.instances.has(name)) {
-      const logger = winston.createLogger({
-        level: process.env.LOG_LEVEL || 'info',
-        defaultMeta: { service: name, ...meta },
-        format: winston.format.combine(
-          winston.format.timestamp(),
-          winston.format.errors({ stack: true }),
-          winston.format.json()
-        ),
-        transports: [
-          new winston.transports.Console({
-            format: winston.format.combine(
-              winston.format.colorize(),
-              winston.format.simple()
-            )
-          }),
-          new winston.transports.File({
-            filename: `logs/${name}-error.log`,
-            level: 'error'
-          }),
-          new winston.transports.File({
-            filename: `logs/${name}.log`
-          })
-        ]
-      });
-      
-      this.instances.set(name, logger);
-    }
-    
-    return this.instances.get(name)!;
-  }
-  
-  static child(parent: winston.Logger, meta: Record<string, any>): winston.Logger {
-    return parent.child(meta);
-  }
-}
-```
-
-### 4. Base Scraper with Composition
-**src/scrapers/base.ts**
-```typescript
-import { PlaywrightCrawler, CheerioCrawler, Dataset } from 'crawlee';
-import { Result, ok, err } from 'neverthrow';
-import winston from 'winston';
-import { ScraperConfig } from '../core/config';
-import { Logger } from '../core/logger';
-import { ScraperError, ErrorCodes, tryCatch } from '../core/errors';
-import { OutputManager } from '../outputs/manager';
-import { RetryManager } from '../utils/retry';
-
-export interface ScraperComponents {
-  config: ScraperConfig;
-  logger: winston.Logger;
-  outputManager: OutputManager;
-  retryManager: RetryManager;
-}
-
-export abstract class BaseScraper {
-  protected crawler: PlaywrightCrawler | CheerioCrawler;
-  protected logger: winston.Logger;
-  protected outputManager: OutputManager;
-  protected retryManager: RetryManager;
-  
-  constructor(protected components: ScraperComponents) {
-    this.logger = components.logger;
-    this.outputManager = components.outputManager;
-    this.retryManager = components.retryManager;
-    this.setupCrawler();
-  }
-  
-  abstract extractData(context: any): Promise<Result<any, ScraperError>>;
-  
-  protected setupCrawler(): void {
-    const { config } = this.components;
-    
-    const crawlerOptions = {
-      maxRequestsPerCrawl: config.rateLimit.requestsPerMinute,
-      maxConcurrency: config.rateLimit.concurrent,
-      requestHandlerTimeoutSecs: 60,
-      requestHandler: this.createRequestHandler()
-    };
-    
-    if (config.crawlerType === 'playwright') {
-      this.crawler = new PlaywrightCrawler(crawlerOptions);
-    } else {
-      this.crawler = new CheerioCrawler(crawlerOptions);
-    }
-  }
-  
-  protected createRequestHandler() {
-    return async (context: any) => {
-      const { request } = context;
-      this.logger.info('Processing page', { url: request.url });
-      
-      // Extract data with retry
-      const result = await this.retryManager.retry(
-        () => this.extractData(context),
-        { maxAttempts: this.components.config.retries.maxAttempts }
-      );
-      
-      if (result.isErr()) {
-        this.logger.error('Failed to extract data', {
-          url: request.url,
-          error: result.error
-        });
-        return;
-      }
-      
-      // Process through output manager
-      const outputResult = await this.outputManager.process(result.value);
-      if (outputResult.isErr()) {
-        this.logger.error('Failed to output data', {
-          error: outputResult.error
-        });
-      }
-    };
-  }
-  
-  async run(urls: string[]): Promise<Result<void, Error>> {
-    try {
-      await this.outputManager.initialize();
-      await this.crawler.run(urls);
-      await this.outputManager.finalize();
       return ok(undefined);
     } catch (error) {
-      return err(new Error(`Scraper failed: ${error}`));
+      return err(new Error(`Failed to load plugins: ${error}`));
     }
   }
-}
-```
-
-### 5. Output Manager
-**src/outputs/manager.ts**
-```typescript
-import { Result, ok, err } from 'neverthrow';
-import { OutputAdapter } from './base';
-import { CSVOutput } from './csv';
-import { DatabaseOutput } from './database';
-import { S3Output } from './s3';
-import { ScraperConfig, OutputConfigSchema } from '../core/config';
-import { aggregateErrors } from '../core/errors';
-
-export class OutputManager {
-  private outputs: OutputAdapter[] = [];
-  private buffer: any[] = [];
-  private batchSize = 100;
   
-  constructor(private config: ScraperConfig) {
-    this.setupOutputs();
-  }
-  
-  private setupOutputs(): void {
-    for (const outputConfig of this.config.outputs) {
-      if (!outputConfig.enabled) continue;
+  private async loadPlugin(pluginPath: string): Promise<void> {
+    try {
+      const indexPath = path.join(pluginPath, 'index.ts');
+      const module = await import(indexPath);
       
-      switch (outputConfig.type) {
-        case 'csv':
-          this.outputs.push(new CSVOutput(outputConfig.options));
-          break;
-        case 'database':
-          this.outputs.push(new DatabaseOutput(outputConfig.options));
-          break;
-        case 's3':
-          this.outputs.push(new S3Output(outputConfig.options));
-          break;
+      if (module.default && typeof module.default.create === 'function') {
+        const metadata = module.default.metadata || {};
+        this.registry.register(metadata.name, module.default);
       }
+    } catch (error) {
+      // Skip invalid plugins
+      console.warn(`Failed to load plugin from ${pluginPath}:`, error);
     }
-  }
-  
-  async initialize(): Promise<Result<void, Error>> {
-    const results = await Promise.all(
-      this.outputs.map(output => output.initialize())
-    );
-    return aggregateErrors(results).map(() => undefined);
-  }
-  
-  async process(data: any): Promise<Result<void, Error>> {
-    this.buffer.push(data);
-    
-    if (this.buffer.length >= this.batchSize) {
-      return this.flush();
-    }
-    
-    return ok(undefined);
-  }
-  
-  async flush(): Promise<Result<void, Error>> {
-    if (this.buffer.length === 0) return ok(undefined);
-    
-    const batch = [...this.buffer];
-    this.buffer = [];
-    
-    const results = await Promise.all(
-      this.outputs.map(output => output.write(batch))
-    );
-    
-    return aggregateErrors(results).map(() => undefined);
-  }
-  
-  async finalize(): Promise<Result<void, Error>> {
-    await this.flush();
-    
-    const results = await Promise.all(
-      this.outputs.map(output => output.close())
-    );
-    
-    return aggregateErrors(results).map(() => undefined);
   }
 }
 ```
 
-### 6. Output Adapters
-**src/outputs/base.ts**
+### 3. Execution Engine
+**src/runtime/engine.ts**
 ```typescript
-import { Result } from 'neverthrow';
+import { injectable, inject } from 'tsyringe';
+import { PlaywrightCrawler, CheerioCrawler } from 'crawlee';
+import { Result, ok, err } from 'neverthrow';
+import { Pipeline } from '@core/pipeline';
+import { Context } from '@core/context';
+import { PluginRegistry } from './registry';
+import winston from 'winston';
 
-export interface OutputAdapter {
-  initialize(): Promise<Result<void, Error>>;
-  write(data: any[]): Promise<Result<void, Error>>;
-  close(): Promise<Result<void, Error>>;
+export interface EngineConfig {
+  crawlerType: 'playwright' | 'cheerio';
+  maxRequestsPerCrawl?: number;
+  maxConcurrency?: number;
+  requestHandlerTimeoutSecs?: number;
+}
+
+@injectable()
+export class ScrapingEngine {
+  private crawler?: PlaywrightCrawler | CheerioCrawler;
+  
+  constructor(
+    @inject('Logger') private logger: winston.Logger,
+    private registry: PluginRegistry
+  ) {}
+  
+  async initialize(config: EngineConfig): Promise<Result<void, Error>> {
+    try {
+      const crawlerOptions = {
+        maxRequestsPerCrawl: config.maxRequestsPerCrawl || 100,
+        maxConcurrency: config.maxConcurrency || 1,
+        requestHandlerTimeoutSecs: config.requestHandlerTimeoutSecs || 60,
+        requestHandler: this.createRequestHandler()
+      };
+      
+      if (config.crawlerType === 'playwright') {
+        this.crawler = new PlaywrightCrawler(crawlerOptions);
+      } else {
+        this.crawler = new CheerioCrawler(crawlerOptions);
+      }
+      
+      return ok(undefined);
+    } catch (error) {
+      return err(new Error(`Failed to initialize engine: ${error}`));
+    }
+  }
+  
+  private createRequestHandler() {
+    return async (crawlerContext: any) => {
+      const { request } = crawlerContext;
+      const context = new Context(this.logger);
+      context.set('url', request.url);
+      context.set('crawlerContext', crawlerContext);
+      
+      // Execute pipeline
+      const pipeline = context.get<Pipeline>('pipeline');
+      if (pipeline) {
+        const result = await pipeline.execute(crawlerContext, context);
+        if (result.isErr()) {
+          this.logger.error('Pipeline execution failed', {
+            url: request.url,
+            error: result.error.message
+          });
+        }
+      }
+    };
+  }
+  
+  async run(urls: string[], pipeline: Pipeline): Promise<Result<void, Error>> {
+    if (!this.crawler) {
+      return err(new Error('Engine not initialized'));
+    }
+    
+    try {
+      // Store pipeline in context for request handler
+      const context = new Context(this.logger);
+      context.set('pipeline', pipeline);
+      
+      await this.crawler.run(urls);
+      return ok(undefined);
+    } catch (error) {
+      return err(new Error(`Scraping failed: ${error}`));
+    }
+  }
 }
 ```
 
-**src/outputs/csv.ts**
+### 4. Plugin Implementations
+**src/plugins/extractors/cheerio-extractor.ts**
 ```typescript
+import { Plugin, PluginMetadata } from '@core/plugin';
+import { Context } from '@core/context';
+import { Result, ok, err } from 'neverthrow';
+import { z } from 'zod';
+import { ExtractorConfig, ScrapedData } from '@core/types';
+
+const ConfigSchema = z.object({
+  selectors: z.record(z.union([
+    z.string(),
+    z.object({
+      selector: z.string(),
+      attribute: z.string().optional(),
+      transform: z.function().optional()
+    })
+  ])),
+  waitForSelector: z.string().optional(),
+  timeout: z.number().default(30000)
+});
+
+export class CheerioExtractorPlugin implements Plugin<ExtractorConfig> {
+  metadata: PluginMetadata = {
+    name: 'cheerio-extractor',
+    version: '1.0.0',
+    type: 'extractor',
+    description: 'Extracts data using Cheerio selectors',
+    configSchema: ConfigSchema
+  };
+  
+  constructor(private config: ExtractorConfig) {}
+  
+  async execute(input: any, context: Context): Promise<Result<ScrapedData, Error>> {
+    const { $ } = input; // Cheerio instance from crawler
+    const url = context.get<string>('url') || '';
+    
+    try {
+      const data: Record<string, any> = {};
+      
+      for (const [key, selectorConfig] of Object.entries(this.config.selectors)) {
+        const selector = typeof selectorConfig === 'string' 
+          ? selectorConfig 
+          : selectorConfig.selector;
+          
+        const element = $(selector);
+        if (element.length === 0) {
+          context.logger.warn(`Selector not found: ${key}`, { selector });
+          continue;
+        }
+        
+        let value: any;
+        if (typeof selectorConfig === 'object' && selectorConfig.attribute) {
+          value = element.attr(selectorConfig.attribute);
+        } else {
+          value = element.text().trim();
+        }
+        
+        if (typeof selectorConfig === 'object' && selectorConfig.transform) {
+          value = selectorConfig.transform(value);
+        }
+        
+        data[key] = value;
+      }
+      
+      return ok({
+        url,
+        timestamp: new Date(),
+        data,
+        metadata: { extractorType: 'cheerio' }
+      });
+    } catch (error) {
+      return err(new Error(`Extraction failed: ${error}`));
+    }
+  }
+}
+
+export default {
+  metadata: CheerioExtractorPlugin.prototype.metadata,
+  create: (config: ExtractorConfig) => new CheerioExtractorPlugin(config)
+};
+```
+
+**src/plugins/outputs/csv-plugin.ts**
+```typescript
+import { Plugin, PluginMetadata } from '@core/plugin';
+import { Context } from '@core/context';
+import { Result, ok, err } from 'neverthrow';
 import { createWriteStream, WriteStream } from 'fs';
 import { mkdir } from 'fs/promises';
 import { dirname } from 'path';
-import { Result, ok, err } from 'neverthrow';
-import { OutputAdapter } from './base';
-import { tryCatch } from '../core/errors';
+import { z } from 'zod';
+import { ScrapedData } from '@core/types';
 
-interface CSVOptions {
-  path: string;
-  headers: boolean;
-  delimiter: string;
-}
+const ConfigSchema = z.object({
+  path: z.string(),
+  headers: z.boolean().default(true),
+  delimiter: z.string().default(','),
+  batchSize: z.number().default(100)
+});
 
-export class CSVOutput implements OutputAdapter {
+export class CSVOutputPlugin implements Plugin {
+  metadata: PluginMetadata = {
+    name: 'csv-output',
+    version: '1.0.0',
+    type: 'output',
+    description: 'Writes scraped data to CSV files',
+    configSchema: ConfigSchema
+  };
+  
   private stream?: WriteStream;
   private headerWritten = false;
+  private buffer: any[] = [];
   
-  constructor(private options: CSVOptions) {}
+  constructor(private config: z.infer<typeof ConfigSchema>) {}
   
   async initialize(): Promise<Result<void, Error>> {
-    // Ensure directory exists
-    await mkdir(dirname(this.options.path), { recursive: true });
-    
-    return tryCatch(async () => {
-      this.stream = createWriteStream(this.options.path);
-    }, 'OUTPUT_FAILED');
+    try {
+      await mkdir(dirname(this.config.path), { recursive: true });
+      this.stream = createWriteStream(this.config.path);
+      return ok(undefined);
+    } catch (error) {
+      return err(new Error(`Failed to initialize CSV output: ${error}`));
+    }
   }
   
-  async write(data: any[]): Promise<Result<void, Error>> {
-    if (!this.stream || data.length === 0) {
-      return ok(undefined);
-    }
-    
+  async execute(input: ScrapedData[], context: Context): Promise<Result<void, Error>> {
     try {
-      // Write headers on first batch
-      if (this.options.headers && !this.headerWritten) {
-        const headers = Object.keys(data[0]).join(this.options.delimiter);
-        this.stream.write(headers + '\n');
-        this.headerWritten = true;
-      }
+      this.buffer.push(...input);
       
-      // Write data rows
-      for (const row of data) {
-        const values = Object.values(row)
-          .map(v => this.escapeValue(String(v)))
-          .join(this.options.delimiter);
-        this.stream.write(values + '\n');
+      if (this.buffer.length >= this.config.batchSize) {
+        return this.flush();
       }
       
       return ok(undefined);
@@ -611,393 +626,596 @@ export class CSVOutput implements OutputAdapter {
     }
   }
   
-  async close(): Promise<Result<void, Error>> {
+  private async flush(): Promise<Result<void, Error>> {
+    if (!this.stream || this.buffer.length === 0) {
+      return ok(undefined);
+    }
+    
+    try {
+      // Write headers on first flush
+      if (this.config.headers && !this.headerWritten && this.buffer.length > 0) {
+        const headers = Object.keys(this.buffer[0].data).join(this.config.delimiter);
+        this.stream.write(`url,timestamp,${headers}\n`);
+        this.headerWritten = true;
+      }
+      
+      // Write data rows
+      for (const item of this.buffer) {
+        const values = [
+          item.url,
+          item.timestamp.toISOString(),
+          ...Object.values(item.data).map(v => this.escapeValue(String(v)))
+        ].join(this.config.delimiter);
+        
+        this.stream.write(values + '\n');
+      }
+      
+      this.buffer = [];
+      return ok(undefined);
+    } catch (error) {
+      return err(new Error(`Failed to flush CSV: ${error}`));
+    }
+  }
+  
+  async cleanup(): Promise<void> {
+    await this.flush();
+    
     return new Promise((resolve) => {
       if (!this.stream) {
-        resolve(ok(undefined));
+        resolve();
         return;
       }
       
-      this.stream.end(() => resolve(ok(undefined)));
+      this.stream.end(() => resolve());
     });
   }
   
   private escapeValue(value: string): string {
-    if (value.includes(this.options.delimiter) || value.includes('"')) {
+    if (value.includes(this.config.delimiter) || value.includes('"')) {
       return `"${value.replace(/"/g, '""')}"`;
     }
     return value;
   }
 }
+
+export default {
+  metadata: CSVOutputPlugin.prototype.metadata,
+  create: (config: z.infer<typeof ConfigSchema>) => new CSVOutputPlugin(config)
+};
+
 ```
 
-### 7. Retry Manager
-**src/utils/retry.ts**
+### 5. API Builder
+**src/api/builder.ts**
 ```typescript
-import { Result, ok, err } from 'neverthrow';
+import { container } from 'tsyringe';
+import { Pipeline } from '@core/pipeline';
+import { Context } from '@core/context';
+import { PluginRegistry } from '@runtime/registry';
+import { ScrapingEngine, EngineConfig } from '@runtime/engine';
+import { Result } from 'neverthrow';
+import winston from 'winston';
 
-interface RetryOptions {
-  maxAttempts: number;
-  backoff?: 'exponential' | 'linear';
-  initialDelay?: number;
-}
-
-export class RetryManager {
-  async retry<T>(
-    fn: () => Promise<Result<T, Error>>,
-    options: RetryOptions
-  ): Promise<Result<T, Error>> {
-    const { maxAttempts, backoff = 'exponential', initialDelay = 1000 } = options;
+export class ScraperBuilder {
+  private pipeline = new Pipeline();
+  private engineConfig: EngineConfig = { crawlerType: 'cheerio' };
+  private logger: winston.Logger;
+  
+  constructor(name: string = 'scraper') {
+    this.logger = winston.createLogger({
+      level: process.env.LOG_LEVEL || 'info',
+      defaultMeta: { service: name },
+      format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.json()
+      ),
+      transports: [
+        new winston.transports.Console({
+          format: winston.format.simple()
+        })
+      ]
+    });
     
-    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-      const result = await fn();
-      
-      if (result.isOk()) {
-        return result;
-      }
-      
-      if (attempt < maxAttempts) {
-        const delay = backoff === 'exponential' 
-          ? initialDelay * Math.pow(2, attempt - 1)
-          : initialDelay * attempt;
-          
-        await new Promise(resolve => setTimeout(resolve, delay));
-      }
+    container.register('Logger', { useValue: this.logger });
+  }
+  
+  usePlaywright(): this {
+    this.engineConfig.crawlerType = 'playwright';
+    return this;
+  }
+  
+  useCheerio(): this {
+    this.engineConfig.crawlerType = 'cheerio';
+    return this;
+  }
+  
+  extract(pluginName: string, config?: any): this {
+    const registry = container.resolve(PluginRegistry);
+    const result = registry.create(pluginName, config);
+    
+    if (result.isOk()) {
+      this.pipeline.add(`extract-${pluginName}`, result.value);
+    } else {
+      throw new Error(`Failed to create extractor: ${result.error.message}`);
     }
     
-    return err(new Error(`Failed after ${maxAttempts} attempts`));
+    return this;
+  }
+  
+  transform(pluginName: string, config?: any): this {
+    const registry = container.resolve(PluginRegistry);
+    const result = registry.create(pluginName, config);
+    
+    if (result.isOk()) {
+      this.pipeline.add(`transform-${pluginName}`, result.value);
+    } else {
+      throw new Error(`Failed to create transformer: ${result.error.message}`);
+    }
+    
+    return this;
+  }
+  
+  output(pluginName: string, config?: any): this {
+    const registry = container.resolve(PluginRegistry);
+    const result = registry.create(pluginName, config);
+    
+    if (result.isOk()) {
+      this.pipeline.add(`output-${pluginName}`, result.value);
+    } else {
+      throw new Error(`Failed to create output: ${result.error.message}`);
+    }
+    
+    return this;
+  }
+  
+  async run(urls: string[]): Promise<Result<void, Error>> {
+    const engine = container.resolve(ScrapingEngine);
+    
+    const initResult = await engine.initialize(this.engineConfig);
+    if (initResult.isErr()) {
+      return initResult;
+    }
+    
+    return engine.run(urls, this.pipeline);
   }
 }
 ```
 
-### 8. CLI Interface
+### 6. Public API
+**src/api/index.ts**
+```typescript
+import 'reflect-metadata';
+import { container } from 'tsyringe';
+import { PluginRegistry } from '@runtime/registry';
+import { PluginLoader } from '@runtime/loader';
+import { ScraperBuilder } from './builder';
+
+// Initialize DI container
+const registry = new PluginRegistry();
+container.registerSingleton(PluginRegistry);
+container.registerSingleton(PluginLoader);
+
+// Export public API
+export { ScraperBuilder } from './builder';
+export { Plugin, PluginMetadata } from '@core/plugin';
+export { Context } from '@core/context';
+export { Result, ok, err } from '@core/result';
+export * from '@core/types';
+
+// Factory function
+export function createScraper(name?: string): ScraperBuilder {
+  return new ScraperBuilder(name);
+}
+
+// Load built-in plugins
+export async function loadPlugins(directory: string = './src/plugins'): Promise<void> {
+  const loader = container.resolve(PluginLoader);
+  const result = await loader.loadFromDirectory(directory);
+  
+  if (result.isErr()) {
+    throw result.error;
+  }
+}
+```
+
+### 7. CLI Interface
 **src/cli/index.ts**
 ```typescript
 #!/usr/bin/env node
+import 'reflect-metadata';
 import { Command } from 'commander';
-import { ConfigLoader } from '../core/config';
-import { Logger } from '../core/logger';
-import { ScraperFactory } from '../scrapers/factory';
+import { createScraper, loadPlugins } from '@api/index';
+import * as fs from 'fs/promises';
+import * as path from 'path';
 
 const program = new Command();
-const logger = Logger.create('cli');
 
 program
   .name('scraper')
-  .description('Production-ready web scraper')
+  .description('Plugin-based web scraper')
   .version('1.0.0');
 
 program
-  .command('run <scraper>')
-  .description('Run a specific scraper')
+  .command('run <config>')
+  .description('Run scraper with configuration file')
   .option('-u, --urls <urls...>', 'URLs to scrape')
-  .option('-c, --config <path>', 'Config file path')
-  .action(async (scraperName, options) => {
+  .action(async (configFile, options) => {
     try {
+      // Load plugins
+      await loadPlugins();
+      
       // Load configuration
-      const configPath = options.config || `configs/${scraperName}.json`;
-      const configResult = await ConfigLoader.load(configPath);
+      const configPath = path.resolve(configFile);
+      const configModule = await import(configPath);
+      const config = configModule.default || configModule;
       
-      if (configResult.isErr()) {
-        logger.error('Failed to load config', { error: configResult.error });
-        process.exit(1);
+      // Build and run scraper
+      const scraper = createScraper(config.name);
+      
+      // Apply configuration
+      if (config.crawler) {
+        config.crawler === 'playwright' 
+          ? scraper.usePlaywright() 
+          : scraper.useCheerio();
       }
       
-      // Create and run scraper
-      const scraper = ScraperFactory.create(scraperName, configResult.value);
-      const urls = options.urls || [configResult.value.baseUrl];
+      if (config.extract) {
+        scraper.extract(config.extract.plugin, config.extract.config);
+      }
       
+      if (config.transforms) {
+        for (const transform of config.transforms) {
+          scraper.transform(transform.plugin, transform.config);
+        }
+      }
+      
+      if (config.outputs) {
+        for (const output of config.outputs) {
+          scraper.output(output.plugin, output.config);
+        }
+      }
+      
+      // Run scraper
+      const urls = options.urls || config.urls || [];
       const result = await scraper.run(urls);
+      
       if (result.isErr()) {
-        logger.error('Scraping failed', { error: result.error });
+        console.error('❌ Scraping failed:', result.error.message);
         process.exit(1);
       }
       
-      logger.info('Scraping completed successfully');
+      console.log('✅ Scraping completed successfully');
     } catch (error) {
-      logger.error('Unexpected error', { error });
+      console.error('❌ Error:', error);
       process.exit(1);
     }
   });
 
 program
-  .command('validate <config>')
-  .description('Validate scraper configuration')
-  .action(async (configPath) => {
-    const result = await ConfigLoader.load(configPath);
-    
-    if (result.isErr()) {
-      console.error('❌ Invalid configuration:', result.error.message);
-      process.exit(1);
-    }
-    
-    console.log('✅ Configuration is valid');
-    console.log(JSON.stringify(result.value, null, 2));
-  });
-
-program
-  .command('list')
-  .description('List available scrapers')
+  .command('plugins')
+  .description('List available plugins')
   .action(async () => {
-    const result = await ConfigLoader.loadAll('./configs');
-    
-    if (result.isOk()) {
-      console.log('Available scrapers:');
-      result.value.forEach(config => {
-        console.log(`  - ${config.name}: ${config.baseUrl}`);
-      });
+    await loadPlugins();
+    console.log('Available plugins:');
+    // Would need to expose plugin list from registry
+  });
+
+program
+  .command('create-plugin <name>')
+  .description('Create a new plugin template')
+  .option('-t, --type <type>', 'Plugin type', 'extractor')
+  .action(async (name, options) => {
+    const template = `import { Plugin, PluginMetadata } from '@core/plugin';
+import { Context } from '@core/context';
+import { Result, ok, err } from 'neverthrow';
+import { z } from 'zod';
+
+const ConfigSchema = z.object({
+  // Define your config schema here
+});
+
+export class ${name}Plugin implements Plugin {
+  metadata: PluginMetadata = {
+    name: '${name}',
+    version: '1.0.0',
+    type: '${options.type}',
+    description: 'Description of your plugin',
+    configSchema: ConfigSchema
+  };
+  
+  constructor(private config: z.infer<typeof ConfigSchema>) {}
+  
+  async execute(input: any, context: Context): Promise<Result<any, Error>> {
+    try {
+      // Your plugin logic here
+      return ok(input);
+    } catch (error) {
+      return err(new Error(\`Plugin failed: \${error}\`));
     }
+  }
+}
+
+export default {
+  metadata: ${name}Plugin.prototype.metadata,
+  create: (config: z.infer<typeof ConfigSchema>) => new ${name}Plugin(config)
+};
+`;
+    
+    const dir = `./src/plugins/${options.type}s`;
+    await fs.mkdir(dir, { recursive: true });
+    await fs.writeFile(path.join(dir, `${name}.ts`), template);
+    
+    console.log(`✅ Created plugin template at ${dir}/${name}.ts`);
   });
 
 program.parse();
 ```
 
-## Example Scraper Implementation
+## Example Usage
 
-### 1. Create Configuration
-**configs/books.json**
-```json
-{
-  "name": "books-scraper",
-  "baseUrl": "https://books.toscrape.com",
-  "crawlerType": "cheerio",
-  "selectors": {
-    "title": "h1",
-    "price": ".price_color",
-    "availability": ".availability",
-    "rating": ".star-rating",
-    "description": "#product_description + p"
-  },
-  "pagination": {
-    "nextButtonSelector": ".next a",
-    "maxPages": 5
-  },
-  "rateLimit": {
-    "requestsPerMinute": 30,
-    "concurrent": 2
-  },
-  "outputs": [
-    {
-      "type": "csv",
-      "enabled": true,
-      "options": {
-        "path": "./exports/books.csv",
-        "headers": true,
-        "delimiter": ","
+### 1. Simple Example
+**examples/simple.ts**
+```typescript
+import { createScraper, loadPlugins } from '../src/api';
+
+// Load plugins
+await loadPlugins();
+
+// Create and configure scraper
+const scraper = createScraper('book-scraper')
+  .useCheerio()
+  .extract('cheerio-extractor', {
+    selectors: {
+      title: 'h1',
+      price: { selector: '.price_color', transform: (v) => parseFloat(v.replace('£', '')) },
+      availability: '.availability',
+      rating: { selector: '.star-rating', attribute: 'class' }
+    }
+  })
+  .output('csv-output', {
+    path: './exports/books.csv',
+    headers: true
+  });
+
+// Run scraper
+const result = await scraper.run(['https://books.toscrape.com']);
+
+if (result.isOk()) {
+  console.log('Scraping completed!');
+} else {
+  console.error('Failed:', result.error);
+}
+```
+
+### 2. Configuration-Based Example
+**configs/books.config.ts**
+```typescript
+export default {
+  name: 'books-scraper',
+  crawler: 'cheerio',
+  urls: ['https://books.toscrape.com'],
+  
+  extract: {
+    plugin: 'cheerio-extractor',
+    config: {
+      selectors: {
+        title: 'h1',
+        price: {
+          selector: '.price_color',
+          transform: (value: string) => parseFloat(value.replace(/[£$]/, ''))
+        },
+        availability: '.availability',
+        rating: {
+          selector: '.star-rating',
+          attribute: 'class',
+          transform: (value: string) => {
+            const match = value.match(/star-rating (\w+)/);
+            return match ? match[1] : null;
+          }
+        }
       }
-    },
+    }
+  },
+  
+  transforms: [
     {
-      "type": "database",
-      "enabled": false,
-      "options": {
-        "connection": "postgres://localhost/scrapers",
-        "table": "books",
-        "upsert": true
+      plugin: 'add-metadata',
+      config: {
+        fields: {
+          scrapedAt: () => new Date().toISOString(),
+          source: 'books.toscrape.com'
+        }
       }
     }
   ],
-  "retries": {
-    "maxAttempts": 3,
-    "backoff": "exponential"
-  }
-}
+  
+  outputs: [
+    {
+      plugin: 'csv-output',
+      config: {
+        path: './exports/books.csv',
+        headers: true
+      }
+    },
+    {
+      plugin: 'console-output',
+      config: {
+        pretty: true
+      }
+    }
+  ]
+};
 ```
 
-### 2. Implement Scraper
-**src/scrapers/books/index.ts**
+### 3. Custom Plugin Example
+**src/plugins/transforms/add-metadata.ts**
 ```typescript
-import { Result, ok, err } from 'neverthrow';
-import { BaseScraper } from '../base';
-import { ScraperError, ErrorCodes } from '../../core/errors';
+import { Plugin, PluginMetadata } from '@core/plugin';
+import { Context } from '@core/context';
+import { Result, ok } from 'neverthrow';
+import { z } from 'zod';
+import { ScrapedData } from '@core/types';
 
-export class BooksScraper extends BaseScraper {
-  async extractData(context: any): Promise<Result<any, ScraperError>> {
-    const { $ } = context; // Cheerio instance
-    const { selectors } = this.components.config;
-    
-    try {
-      const data: Record<string, any> = {};
-      
-      // Extract data using selectors
-      for (const [key, selector] of Object.entries(selectors)) {
-        const element = $(selector);
-        if (element.length === 0) {
-          this.logger.warn(`Selector not found: ${key}`, { selector });
-          continue;
-        }
-        
-        // Special handling for rating
-        if (key === 'rating') {
-          const classes = element.attr('class') || '';
-          const match = classes.match(/star-rating (\w+)/);
-          data[key] = match ? match[1] : null;
-        } else {
-          data[key] = element.text().trim();
-        }
-      }
-      
-      // Parse price
-      if (data.price) {
-        data.price = parseFloat(data.price.replace(/[£$]/, ''));
-      }
-      
-      // Add metadata
-      data.url = context.request.url;
-      data.scrapedAt = new Date().toISOString();
-      
-      return ok(data);
-    } catch (error) {
-      return err(new ScraperError(
-        `Failed to extract data: ${error}`,
-        ErrorCodes.SELECTOR_NOT_FOUND,
-        { url: context.request.url }
-      ));
-    }
-  }
-}
-```
+const ConfigSchema = z.object({
+  fields: z.record(z.union([z.string(), z.function()]))
+});
 
-### 3. Register in Factory
-**src/scrapers/factory.ts**
-```typescript
-import { ScraperConfig } from '../core/config';
-import { BaseScraper, ScraperComponents } from './base';
-import { BooksScraper } from './books';
-import { Logger } from '../core/logger';
-import { OutputManager } from '../outputs/manager';
-import { RetryManager } from '../utils/retry';
-
-export class ScraperFactory {
-  private static scrapers = new Map<string, typeof BaseScraper>([
-    ['books-scraper', BooksScraper],
-    // Add more scrapers here
-  ]);
+export class AddMetadataPlugin implements Plugin {
+  metadata: PluginMetadata = {
+    name: 'add-metadata',
+    version: '1.0.0',
+    type: 'transform',
+    description: 'Adds metadata fields to scraped data',
+    configSchema: ConfigSchema
+  };
   
-  static create(name: string, config: ScraperConfig): BaseScraper {
-    const ScraperClass = this.scrapers.get(name);
-    if (!ScraperClass) {
-      throw new Error(`Unknown scraper: ${name}`);
+  constructor(private config: z.infer<typeof ConfigSchema>) {}
+  
+  async execute(input: ScrapedData, context: Context): Promise<Result<ScrapedData, Error>> {
+    const metadata: Record<string, any> = {};
+    
+    for (const [key, value] of Object.entries(this.config.fields)) {
+      metadata[key] = typeof value === 'function' ? value() : value;
     }
     
-    const components: ScraperComponents = {
-      config,
-      logger: Logger.create(name),
-      outputManager: new OutputManager(config),
-      retryManager: new RetryManager()
-    };
-    
-    return new ScraperClass(components);
-  }
-  
-  static register(name: string, scraperClass: typeof BaseScraper): void {
-    this.scrapers.set(name, scraperClass);
+    return ok({
+      ...input,
+      data: {
+        ...input.data,
+        ...metadata
+      }
+    });
   }
 }
+
+export default {
+  metadata: AddMetadataPlugin.prototype.metadata,
+  create: (config: z.infer<typeof ConfigSchema>) => new AddMetadataPlugin(config)
+};
 ```
 
 ## Testing
 
-### 1. Unit Test Example
-**tests/unit/scrapers/books.test.ts**
+### 1. Plugin Unit Test
+**tests/unit/plugins/cheerio-extractor.test.ts**
 ```typescript
-import { BooksScraper } from '../../../src/scrapers/books';
-import { ScraperComponents } from '../../../src/scrapers/base';
-import { Logger } from '../../../src/core/logger';
-import { OutputManager } from '../../../src/outputs/manager';
-import { RetryManager } from '../../../src/utils/retry';
+import { CheerioExtractorPlugin } from '@plugins/extractors/cheerio-extractor';
+import { Context } from '@core/context';
+import winston from 'winston';
 
-describe('BooksScraper', () => {
-  let scraper: BooksScraper;
-  let mockComponents: ScraperComponents;
+describe('CheerioExtractorPlugin', () => {
+  let plugin: CheerioExtractorPlugin;
+  let context: Context;
   
   beforeEach(() => {
-    mockComponents = {
-      config: {
-        name: 'test',
-        selectors: {
-          title: 'h1',
-          price: '.price'
-        }
-      },
-      logger: Logger.create('test'),
-      outputManager: {
-        initialize: jest.fn().mockResolvedValue({ isOk: () => true }),
-        process: jest.fn().mockResolvedValue({ isOk: () => true }),
-        finalize: jest.fn().mockResolvedValue({ isOk: () => true })
-      } as any,
-      retryManager: {
-        retry: jest.fn((fn) => fn())
-      } as any
-    };
+    const logger = winston.createLogger({ silent: true });
+    context = new Context(logger);
+    context.set('url', 'https://example.com');
     
-    scraper = new BooksScraper(mockComponents);
+    plugin = new CheerioExtractorPlugin({
+      selectors: {
+        title: 'h1',
+        price: {
+          selector: '.price',
+          transform: (v) => parseFloat(v.replace('£', ''))
+        }
+      }
+    });
   });
   
   it('should extract data correctly', async () => {
-    const mockContext = {
+    const mockCheerio = {
       $: jest.fn((selector) => ({
         text: () => selector === 'h1' ? 'Test Book' : '£10.99',
-        length: 1
-      })),
-      request: { url: 'https://example.com' }
+        length: 1,
+        attr: jest.fn()
+      }))
     };
     
-    const result = await scraper.extractData(mockContext);
+    const result = await plugin.execute(mockCheerio, context);
     
     expect(result.isOk()).toBe(true);
-    expect(result.value).toMatchObject({
-      title: 'Test Book',
-      price: 10.99,
-      url: 'https://example.com'
-    });
+    if (result.isOk()) {
+      expect(result.value.data).toMatchObject({
+        title: 'Test Book',
+        price: 10.99
+      });
+    }
   });
 });
 ```
 
 ### 2. Integration Test
-**tests/integration/books.test.ts**
+**tests/integration/scraper.test.ts**
 ```typescript
-import { ConfigLoader } from '../../../src/core/config';
-import { ScraperFactory } from '../../../src/scrapers/factory';
+import { createScraper, loadPlugins } from '@api/index';
+import * as fs from 'fs/promises';
 
-describe('Books Scraper Integration', () => {
+describe('Scraper Integration', () => {
+  beforeAll(async () => {
+    await loadPlugins();
+  });
+  
+  afterAll(async () => {
+    // Clean up test outputs
+    await fs.rm('./test-exports', { recursive: true, force: true });
+  });
+  
   it('should scrape and save to CSV', async () => {
-    const config = await ConfigLoader.load('./tests/fixtures/books-test.json');
-    expect(config.isOk()).toBe(true);
+    const scraper = createScraper('test')
+      .useCheerio()
+      .extract('cheerio-extractor', {
+        selectors: {
+          title: 'h1',
+          price: '.price_color'
+        }
+      })
+      .output('csv-output', {
+        path: './test-exports/books.csv',
+        headers: true
+      });
     
-    const scraper = ScraperFactory.create('books-scraper', config.value);
-    const result = await scraper.run(['https://books.toscrape.com']);
+    const result = await scraper.run(['https://books.toscrape.com/catalogue/page-1.html']);
     
     expect(result.isOk()).toBe(true);
-    // Verify CSV file exists and contains data
+    
+    // Verify CSV file exists
+    const stats = await fs.stat('./test-exports/books.csv');
+    expect(stats.isFile()).toBe(true);
   });
 });
 ```
 
+## Best Practices
+
+### 1. Plugin Development
+- Keep plugins focused on a single responsibility
+- Use Zod schemas for configuration validation
+- Return Result types for error handling
+- Log using the provided context logger
+- Clean up resources in the cleanup method
+
+### 2. Error Handling
+- Always use Result types instead of throwing
+- Provide meaningful error messages
+- Include context in errors
+- Let errors bubble up through the pipeline
+
+### 3. Performance
+- Use streaming for large datasets
+- Implement batching in output plugins
+- Reuse resources across plugin executions
+- Monitor memory usage
+
+### 4. Testing
+- Unit test each plugin independently
+- Mock external dependencies
+- Test error scenarios
+- Use integration tests for full pipelines
+
 ## Production Deployment
 
-### 1. Environment Configuration
-**.env.production**
-```env
-NODE_ENV=production
-LOG_LEVEL=info
-
-# Database
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=scrapers
-DB_USER=scraper_user
-DB_PASSWORD=${DB_PASSWORD}
-
-# AWS
-AWS_REGION=us-east-1
-S3_BUCKET=scraper-outputs
-
-# Monitoring
-SENTRY_DSN=${SENTRY_DSN}
-```
-
-### 2. Docker Setup
+### 1. Docker Setup
 **Dockerfile**
 ```dockerfile
 FROM node:18-alpine AS builder
@@ -1015,27 +1233,26 @@ RUN npm run build
 FROM node:18-alpine
 WORKDIR /app
 
-# Install production dependencies only
+# Install production dependencies
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci --production
 
-# Copy built files
+# Copy built files and configs
 COPY --from=builder /app/dist ./dist
-COPY configs ./configs
+COPY --from=builder /app/configs ./configs
 
-# Create non-root user
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nodejs -u 1001
+# Create directories
+RUN mkdir -p exports logs
+
+# Non-root user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
 USER nodejs
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=40s \
-  CMD node dist/cli/index.js validate configs/health-check.json
 
 CMD ["node", "dist/cli/index.js"]
 ```
 
-### 3. Docker Compose
+### 2. Docker Compose
 **docker-compose.yml**
 ```yaml
 version: '3.8'
@@ -1043,13 +1260,15 @@ version: '3.8'
 services:
   scraper:
     build: .
-    env_file: .env.production
+    environment:
+      - NODE_ENV=production
+      - LOG_LEVEL=info
     volumes:
+      - ./configs:/app/configs:ro
       - ./exports:/app/exports
       - ./logs:/app/logs
-    depends_on:
-      - postgres
     restart: unless-stopped
+    command: node dist/cli/index.js run /app/configs/production.config.js
 
   postgres:
     image: postgres:15-alpine
@@ -1066,129 +1285,45 @@ volumes:
   postgres_data:
 ```
 
-## Monitoring & Observability
-
-### 1. Health Checks
-**src/utils/health.ts**
-```typescript
-import { Result, ok, err } from 'neverthrow';
-import { Pool } from 'pg';
-
-export class HealthChecker {
-  static async checkDatabase(connectionString: string): Promise<Result<void, Error>> {
-    const pool = new Pool({ connectionString });
-    
-    try {
-      await pool.query('SELECT 1');
-      return ok(undefined);
-    } catch (error) {
-      return err(new Error(`Database unhealthy: ${error}`));
-    } finally {
-      await pool.end();
-    }
-  }
-  
-  static async checkStorage(path: string): Promise<Result<void, Error>> {
-    try {
-      const fs = await import('fs/promises');
-      await fs.access(path, fs.constants.W_OK);
-      return ok(undefined);
-    } catch (error) {
-      return err(new Error(`Storage unhealthy: ${error}`));
-    }
-  }
-}
-```
-
-### 2. Metrics Collection
-**src/utils/metrics.ts**
-```typescript
-export class MetricsCollector {
-  private metrics = new Map<string, number>();
-  
-  increment(metric: string, value = 1): void {
-    const current = this.metrics.get(metric) || 0;
-    this.metrics.set(metric, current + value);
-  }
-  
-  timing(metric: string, duration: number): void {
-    this.metrics.set(`${metric}.duration`, duration);
-  }
-  
-  gauge(metric: string, value: number): void {
-    this.metrics.set(metric, value);
-  }
-  
-  flush(): Record<string, number> {
-    const snapshot = Object.fromEntries(this.metrics);
-    this.metrics.clear();
-    return snapshot;
-  }
-}
-```
-
-## Best Practices
-
-### 1. Error Handling
-- Always use Result types instead of throwing exceptions
-- Log errors with context for debugging
-- Implement retry logic for transient failures
-- Use specific error codes for different failure types
-
-### 2. Configuration
-- Validate all configurations with Zod schemas
-- Use environment variables for secrets
-- Keep configuration files in version control
-- Document all configuration options
-
-### 3. Performance
-- Use connection pooling for databases
-- Implement batching for outputs
-- Monitor memory usage and set limits
-- Use streaming for large datasets
-
-### 4. Testing
-- Write unit tests for data extraction logic
-- Create integration tests for full workflows
-- Use fixtures for test data
-- Mock external dependencies
-
-### 5. Security
-- Never commit secrets to version control
-- Validate and sanitize all inputs
-- Use least privilege for database access
-- Keep dependencies updated
-
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Rate Limiting**
-   - Reduce `requestsPerMinute` in config
-   - Increase delay between requests
-   - Use proxy rotation if needed
+1. **Plugin Not Found**
+   - Ensure plugin is in the correct directory
+   - Check plugin exports default factory
+   - Verify plugin name matches
 
 2. **Memory Issues**
-   - Reduce batch size in outputs
-   - Enable streaming for large files
-   - Monitor with `process.memoryUsage()`
+   - Reduce batch size in output plugins
+   - Implement streaming in plugins
+   - Use pipeline transforms to filter data
 
-3. **Selector Changes**
-   - Use more specific selectors
-   - Add fallback selectors
-   - Monitor selector success rate
+3. **Type Errors**
+   - Validate plugin configs with Zod
+   - Check Result type handling
+   - Ensure proper TypeScript configuration
 
-4. **Connection Errors**
-   - Implement exponential backoff
-   - Add connection pooling
-   - Check firewall rules
+4. **Pipeline Failures**
+   - Check each plugin's error messages
+   - Use context logger for debugging
+   - Test plugins individually
 
-## Roadmap
+## Architecture Benefits
 
-- [ ] Add proxy support with rotation
-- [ ] Implement distributed scraping
-- [ ] Add browser automation options
-- [ ] Create web UI for monitoring
-- [ ] Add webhook notifications
-- [ ] Support for API scraping
-- [ ] GraphQL endpoint for data access
+1. **Modularity**: Each plugin is independent and reusable
+2. **Type Safety**: Full TypeScript support with Zod validation
+3. **Testability**: Plugins can be tested in isolation
+4. **Extensibility**: Easy to add new functionality via plugins
+5. **Composition**: Build complex scrapers from simple pieces
+6. **Error Handling**: Consistent Result pattern throughout
+
+## Migration Guide
+
+From inheritance-based to plugin-based:
+
+1. **Replace Base Classes**: Convert scrapers to extractor plugins
+2. **Convert Output Adapters**: Rewrite as output plugins
+3. **Update Configuration**: Use TypeScript configs instead of JSON
+4. **Refactor Error Handling**: Use Result types everywhere
+5. **Adopt Pipeline Pattern**: Chain plugins instead of method calls
