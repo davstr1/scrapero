@@ -16,8 +16,8 @@ npm init -y
 npm install -D typescript @types/node tsx nodemon
 
 # Core dependencies
-npm install crawlee playwright cheerio zod neverthrow \
-  winston date-fns dotenv commander
+npm install crawlee playwright cheerio zod neverthrow tsyringe \
+  winston date-fns dotenv commander reflect-metadata
 
 # Database drivers (install what you need)
 npm install pg mysql2 mongodb  # Choose based on your needs
