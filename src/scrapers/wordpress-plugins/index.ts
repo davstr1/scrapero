@@ -72,9 +72,16 @@ export default class WordpressPluginsScraper extends BaseScraper {
           // Skip if no name or URL
           if (!name || !url) return;
           
-          // Extract author
-          const authorElement = card.querySelector('.author');
-          const author = authorElement?.textContent?.replace('by', '').trim() || '';
+          // Extract author - try multiple selectors
+          let author = '';
+          const authorSelectors = ['.author a', '.byline a', '.plugin-author a'];
+          for (const selector of authorSelectors) {
+            const authorElement = card.querySelector(selector);
+            if (authorElement?.textContent) {
+              author = authorElement.textContent.trim();
+              break;
+            }
+          }
           
           // Extract description
           const descElement = card.querySelector('.entry-excerpt');
@@ -88,7 +95,7 @@ export default class WordpressPluginsScraper extends BaseScraper {
           // Extract rating count
           const ratingCountElement = card.querySelector('.rating-count a');
           const ratingCountText = ratingCountElement?.textContent || '0';
-          const ratingCountMatch = ratingCountText.match(/([0-9,]+)/);
+          const ratingCountMatch = ratingCountText.match(/\(([0-9,]+)\)/);
           const ratingCount = ratingCountMatch ? parseInt(ratingCountMatch[1].replace(/,/g, '')) : 0;
           
           // Extract active installations
@@ -108,9 +115,16 @@ export default class WordpressPluginsScraper extends BaseScraper {
             }
           }
           
-          // Extract last updated
-          const updatedElement = card.querySelector('.plugin-last-updated strong');
-          const lastUpdated = updatedElement?.textContent?.trim() || '';
+          // Extract last updated - try multiple selectors
+          let lastUpdated = '';
+          const updatedSelectors = ['.plugin-last-updated strong', '.last-updated strong', '.updated strong'];
+          for (const selector of updatedSelectors) {
+            const updatedElement = card.querySelector(selector);
+            if (updatedElement?.textContent) {
+              lastUpdated = updatedElement.textContent.trim();
+              break;
+            }
+          }
           
           // Extract tested up to version
           const testedElement = card.querySelector('.tested-with');
@@ -118,9 +132,16 @@ export default class WordpressPluginsScraper extends BaseScraper {
           const testedMatch = testedText.match(/([0-9.]+)/);
           const testedUpTo = testedMatch ? testedMatch[1] : '';
           
-          // Extract icon URL
-          const iconElement = card.querySelector('.plugin-icon img');
-          const iconUrl = iconElement?.getAttribute('src') || '';
+          // Extract icon URL - try multiple selectors
+          let iconUrl = '';
+          const iconSelectors = ['.plugin-icon img', '.entry-thumbnail img', 'img.plugin-icon'];
+          for (const selector of iconSelectors) {
+            const iconElement = card.querySelector(selector);
+            if (iconElement) {
+              iconUrl = iconElement.getAttribute('src') || iconElement.getAttribute('data-src') || '';
+              if (iconUrl) break;
+            }
+          }
           
           pluginData.push({
             name: name,
