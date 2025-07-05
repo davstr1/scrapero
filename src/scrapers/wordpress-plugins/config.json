@@ -19,9 +19,11 @@
   },
   "pagination": {
     "nextButtonSelector": ".pagination-links a.next",
-    "maxPages": 2
+    "maxPages": 10
   },
-  "maxRequestsPerCrawl": 100,
+  // Each page needs ~21 requests (1 listing + 20 detail pages)
+  // 500 requests allows for ~23 pages of results
+  "maxRequestsPerCrawl": 500,
   "maxConcurrency": 2,
   "outputs": [
     {

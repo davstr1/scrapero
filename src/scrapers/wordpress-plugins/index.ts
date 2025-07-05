@@ -172,7 +172,7 @@ export default class WordpressPluginsScraper extends BaseScraper {
       return pluginData;
     });
 
-    console.log(`Extracted ${plugins.length} plugins from current page`);
+    console.log(`Page ${context.request.userData?.pageNumber || 1}: Extracted ${plugins.length} plugins`);
     
     // Enqueue detail pages for each plugin
     const detailRequests = plugins.map(plugin => {
@@ -190,13 +190,19 @@ export default class WordpressPluginsScraper extends BaseScraper {
     await context.addRequests(detailRequests);
     
     // Handle pagination
+    const currentPage = context.request.userData?.pageNumber || 1;
+    const maxPages = this.config.pagination?.maxPages || 2;
+    
+    console.log(`Processing page ${currentPage} of max ${maxPages}`);
+    
     const hasNextPage = await page.$('.pagination-links a.next:not(.disabled)');
-    if (hasNextPage && context.request.userData?.pageNumber < 2) {
+    if (hasNextPage && currentPage < maxPages) {
       const nextPageUrl = await page.$eval('.pagination-links a.next', (el) => el.getAttribute('href'));
       if (nextPageUrl) {
+        console.log(`Found next page, enqueueing: ${nextPageUrl}`);
         await context.addRequests([{
           url: nextPageUrl.startsWith('http') ? nextPageUrl : `https://wordpress.org${nextPageUrl}`,
-          userData: { pageNumber: (context.request.userData?.pageNumber || 1) + 1 }
+          userData: { pageNumber: currentPage + 1 }
         }]);
       }
     }
