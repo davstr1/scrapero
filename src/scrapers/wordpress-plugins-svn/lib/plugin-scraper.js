@@ -293,48 +293,54 @@ class PluginScraper {
   }
 
   extractActiveInstalls($) {
-    // Find in the meta section
-    const metaSection = $('section').last();
-    const metaText = metaSection.text();
+    // Try multiple approaches to find active installations
     
-    // First try to find in list items
-    const listItems = metaSection.find('li');
+    // Method 1: Look for the specific list item pattern
     let activeInstallsText = '';
+    const listItems = $('li');
     
     listItems.each((i, el) => {
-      const text = $(el).text();
-      if (text.toLowerCase().includes('active installation')) {
-        // Get the HTML to preserve structure
-        activeInstallsText = $(el).html() || text;
-        return false;
+      const html = $(el).html();
+      if (html && html.includes('Active installations')) {
+        // Extract the content within <strong> tags
+        const strongMatch = html.match(/Active installations\s*<strong>([^<]+)<\/strong>/i);
+        if (strongMatch) {
+          activeInstallsText = strongMatch[1].trim();
+          return false;
+        }
       }
     });
     
+    // Method 2: Search in the whole page for the pattern
     if (!activeInstallsText) {
-      // Fallback to searching in full text
-      const match = metaText.match(/Active\s+installations?\s+([^<\n]+)/i);
+      const bodyHtml = $('body').html();
+      const match = bodyHtml.match(/Active installations\s*<strong>([^<]+)<\/strong>/i);
       if (match) {
-        activeInstallsText = match[1];
+        activeInstallsText = match[1].trim();
+      }
+    }
+    
+    // Method 3: Text-based search as fallback
+    if (!activeInstallsText) {
+      const bodyText = $('body').text();
+      const textMatch = bodyText.match(/Active installations\s+(\d+[\d,+\s]*(?:million)?)/i);
+      if (textMatch) {
+        activeInstallsText = textMatch[1].trim();
       }
     }
     
     // Parse the number
     if (activeInstallsText) {
-      // Handle different formats: "10+", "1,000+", "10,000+", "1+ million", "6+ million", etc.
-      let cleanText = activeInstallsText.trim();
+      // Handle different formats: "10+", "1,000+", "10,000+", "10+ million", etc.
+      const cleanText = activeInstallsText.trim();
       
-      // Extract the strong tag content if present
-      const strongMatch = cleanText.match(/<strong>([^<]+)<\/strong>/);
-      if (strongMatch) {
-        cleanText = strongMatch[1];
-      }
-      
+      // Check for millions
       if (cleanText.toLowerCase().includes('million')) {
         const num = parseFloat(cleanText.match(/(\d+(?:\.\d+)?)/)?.[1] || '0');
         return Math.floor(num * 1000000);
       }
       
-      // Remove + and commas, then parse
+      // Remove + and commas, then parse regular numbers
       const num = cleanText.replace(/[+,]/g, '').match(/(\d+)/);
       return num ? parseInt(num[1]) : 0;
     }
