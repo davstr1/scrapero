@@ -37,16 +37,25 @@ class SVNDownloader {
       }
 
       // Make request
-      const response = await axios({
+      const axiosConfig = {
         method: 'GET',
         url: this.svnUrl,
         responseType: 'stream',
         timeout: this.config.svn.timeout,
-        headers,
-        httpAgent: this.proxyAgent,
-        httpsAgent: this.proxyAgent,
+        headers: {
+          ...headers,
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        },
         maxRedirects: 5
-      });
+      };
+
+      // Only use proxy if configured
+      if (this.config.proxy.enabled && this.proxyAgent) {
+        axiosConfig.httpAgent = this.proxyAgent;
+        axiosConfig.httpsAgent = this.proxyAgent;
+      }
+
+      const response = await axios(axiosConfig);
 
       // Get total size
       const totalSize = startByte + parseInt(response.headers['content-length'] || '0');
