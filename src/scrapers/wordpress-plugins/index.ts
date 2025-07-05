@@ -230,6 +230,7 @@ export default class WordpressPluginsScraper extends BaseScraper {
       const tags = await this.extractTags(page);
       const contributors = await this.extractContributors(page);
       const homepage = await this.extractHomepage(page);
+      const extendedDescription = await this.extractExtendedDescription(page);
       
       // Merge with listing data
       const detailData = {
@@ -243,7 +244,8 @@ export default class WordpressPluginsScraper extends BaseScraper {
         supportThreadsResolved: supportStats.resolvedThreads || 0,
         tags,
         contributors,
-        homepage
+        homepage,
+        extendedDescription
       };
       
       return { ...listingData, ...detailData };
@@ -379,6 +381,51 @@ export default class WordpressPluginsScraper extends BaseScraper {
       });
       return homepage;
     } catch (error) {
+      return '';
+    }
+  }
+
+  private async extractExtendedDescription(page: any): Promise<string> {
+    try {
+      // Try multiple selectors for the description
+      const selectors = ['#tab-description', '.plugin-description', '.entry-content'];
+      
+      for (const selector of selectors) {
+        const descElement = await page.$(selector);
+        if (descElement) {
+          // Extract text content, cleaning up whitespace and removing header
+          const fullText = await descElement.evaluate((el: any) => {
+            // Remove the "Description" header if present
+            const header = el.querySelector('h2');
+            if (header && header.textContent?.includes('Description')) {
+              header.remove();
+            }
+            
+            // Get all text content, preserving some structure
+            const textElements = el.querySelectorAll('p, h3, h4, h5, li');
+            const texts: string[] = [];
+            
+            textElements.forEach((elem: any) => {
+              const text = elem.textContent?.trim();
+              if (text && text.length > 0) {
+                texts.push(text);
+              }
+            });
+            
+            // Join with space, limit length to avoid extremely long descriptions
+            return texts.join(' ').replace(/\s+/g, ' ').trim();
+          });
+          
+          if (fullText && fullText.length > 50) {
+            // Limit to reasonable length (e.g., 2000 chars)
+            return fullText.slice(0, 2000);
+          }
+        }
+      }
+      
+      return '';
+    } catch (error) {
+      console.error('Error extracting extended description:', error);
       return '';
     }
   }
