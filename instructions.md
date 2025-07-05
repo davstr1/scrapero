@@ -1,76 +1,84 @@
-# Production-Ready Web Scraping System with Crawlee
+# Complete Instructions: Industrial-Scale Multi-Scraper Project with Crawlee
 
-## Overview
-Build a maintainable, scalable web scraping system using modern TypeScript patterns:
-- **Type-safe configuration** with Zod validation
-- **Modular architecture** with clear separation of concerns  
-- **Plugin-based outputs** for easy extensibility
-- **Production features** built-in (monitoring, error handling, retries)
+## Project Overview
+Create a maintainable, configuration-driven web scraping system using Crawlee that can handle multiple websites with schema separation, pluggable output adapters, and industrial-scale capabilities.
 
-## Quick Start
+## Phase 1: Project Foundation Setup
 
-### 1. Project Setup
+### Step 1: Initialize Project Structure
 ```bash
-# Initialize project with TypeScript
+mkdir scrapers-project && cd scrapers-project
 npm init -y
-npm install -D typescript @types/node tsx nodemon
-
-# Core dependencies
-npm install crawlee playwright cheerio zod neverthrow tsyringe \
-  winston date-fns dotenv commander reflect-metadata
-
-# Database drivers (install what you need)
-npm install pg mysql2 mongodb  # Choose based on your needs
-npm install @aws-sdk/client-s3  # For S3 storage
-
-# Development tools
-npm install -D eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin \
-  prettier eslint-config-prettier eslint-plugin-prettier \
-  jest @types/jest ts-jest
 ```
 
-### 2. Project Structure
+### Step 2: Install Core Dependencies
 ```bash
-# Create all directories
-mkdir -p src/core src/plugins src/runtime src/api src/cli \
-  src/types configs tests/unit tests/integration tests/fixtures \
-  storage exports logs docs examples
+# Core scraping dependencies
+npm install crawlee playwright cheerio
+
+# Database and output dependencies
+npm install pg mysql2 mongodb csv-writer aws-sdk
+
+# Development and utility dependencies
+npm install -D typescript @types/node tsx nodemon
+npm install -D eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin
+npm install -D prettier eslint-config-prettier eslint-plugin-prettier
+npm install -D jest @types/jest ts-jest
+
+# CLI and configuration utilities
+npm install commander dotenv zod lodash
+npm install winston date-fns
 ```
 
+### Step 3: Create Project Directory Structure
 ```
-src/
-├── core/           # Core interfaces and types
-│   ├── plugin.ts   # Plugin system interfaces
-│   ├── pipeline.ts # Pipeline composition
-│   ├── context.ts  # Execution context
-│   ├── result.ts   # Result<T,E> type
-│   └── types.ts    # Shared TypeScript types
-├── plugins/        # Plugin implementations
-│   ├── extractors/ # Data extraction plugins
-│   ├── outputs/    # Output format plugins
-│   ├── transforms/ # Data transformation plugins
-│   └── validators/ # Validation plugins
-├── runtime/        # Execution engine
-│   ├── engine.ts   # Main execution engine
-│   ├── loader.ts   # Plugin loader
-│   ├── registry.ts # Plugin registry
-│   └── executor.ts # Pipeline executor
-├── api/            # Public API
-│   ├── index.ts    # Main exports
-│   ├── builder.ts  # Fluent API builder
-│   └── facade.ts   # Simplified interface
-└── cli/            # CLI interface
-    └── index.ts    # Command definitions
+scrapers-project/
+├── src/
+│   ├── scrapers/
+│   │   ├── base/
+│   │   │   ├── BaseScraper.ts
+│   │   │   └── interfaces.ts
+│   │   └── examples/
+│   ├── outputs/
+│   │   ├── base/
+│   │   │   ├── OutputAdapter.ts
+│   │   │   └── interfaces.ts
+│   │   ├── adapters/
+│   │   ├── processors/
+│   │   └── pipelines/
+│   ├── core/
+│   │   ├── ConfigLoader.ts
+│   │   ├── ProxyManager.ts
+│   │   ├── ScraperFactory.ts
+│   │   └── Logger.ts
+│   ├── utils/
+│   │   ├── validators.ts
+│   │   ├── transformers.ts
+│   │   └── helpers.ts
+│   └── cli/
+│       └── index.ts
+├── configs/
+│   ├── global.json
+│   ├── outputs.json
+│   └── environments/
+│       ├── dev.json
+│       ├── staging.json
+│       └── prod.json
+├── schemas/
+└── storage/
+    ├── datasets/
+    ├── key-value-stores/
+    └── request-queues/
 ```
 
-### 3. TypeScript Configuration
-**tsconfig.json**
+### Step 4: Configure TypeScript
+Create `tsconfig.json`:
 ```json
 {
   "compilerOptions": {
-    "target": "ES2022",
+    "target": "ES2020",
     "module": "commonjs",
-    "lib": ["ES2022"],
+    "lib": ["ES2020"],
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,
@@ -78,37 +86,15 @@ src/
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "strictPropertyInitialization": true,
-    "noImplicitThis": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "baseUrl": "./",
-    "paths": {
-      "@core/*": ["./src/core/*"],
-      "@plugins/*": ["./src/plugins/*"],
-      "@runtime/*": ["./src/runtime/*"],
-      "@api/*": ["./src/api/*"],
-      "@types/*": ["./src/types/*"]
-    }
+    "emitDecoratorMetadata": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "coverage"]
+  "exclude": ["node_modules", "dist"]
 }
 ```
 
-### 4. Package Scripts
-**package.json**
+### Step 5: Setup Package.json Scripts
 ```json
 {
   "scripts": {
@@ -117,1213 +103,1096 @@ src/
     "start": "node dist/cli/index.js",
     "scraper": "tsx src/cli/index.ts",
     "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "lint": "eslint src --ext .ts",
-    "lint:fix": "eslint src --ext .ts --fix",
-    "typecheck": "tsc --noEmit",
-    "validate": "npm run typecheck && npm run lint && npm run test",
-    "clean": "rm -rf dist coverage"
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write src/**/*.ts"
   }
 }
 ```
 
-### 5. Jest Configuration
-**jest.config.js**
-```javascript
-module.exports = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
-  roots: ['<rootDir>/src', '<rootDir>/tests'],
-  testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
-  transform: {
-    '^.+\\.ts$': 'ts-jest',
-  },
-  collectCoverageFrom: [
-    'src/**/*.ts',
-    '!src/**/*.d.ts',
-    '!src/**/index.ts',
-  ],
-  coverageThreshold: {
-    global: {
-      branches: 80,
-      functions: 80,
-      lines: 80,
-      statements: 80,
-    },
-  },
-  moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src/$1',
-  },
-};
-```
+## Phase 2: Core Infrastructure
 
-## Core Implementation
-
-### 1. Core Types and Interfaces
-**src/core/result.ts**
+### Step 6: Create Base Interfaces
+Create `src/outputs/base/interfaces.ts`:
 ```typescript
-import { Result, ok, err, Ok, Err } from 'neverthrow';
-
-export { Result, ok, err, Ok, Err };
-export type AsyncResult<T, E = Error> = Promise<Result<T, E>>;
-
-// Helper to convert Promise to Result
-export async function fromPromise<T>(
-  promise: Promise<T>,
-  errorFn?: (e: unknown) => Error
-): AsyncResult<T> {
-  try {
-    const value = await promise;
-    return ok(value);
-  } catch (e) {
-    return err(errorFn ? errorFn(e) : new Error(String(e)));
-  }
+export interface OutputConfig {
+  type: string;
+  enabled: boolean;
+  config: Record<string, any>;
 }
-```
 
-**src/core/plugin.ts**
-```typescript
-import { Result } from 'neverthrow';
-import { z } from 'zod';
-import { Context } from './context';
+export interface BatchResult {
+  success: boolean;
+  processedCount: number;
+  errorCount: number;
+  errors?: Error[];
+}
 
-export interface PluginMetadata {
+export interface PipelineResult {
+  totalProcessed: number;
+  totalErrors: number;
+  outputResults: Record<string, BatchResult>;
+}
+
+export interface ScraperConfig {
   name: string;
-  version: string;
-  type: 'extractor' | 'output' | 'transform' | 'validator';
-  description?: string;
-  configSchema?: z.ZodSchema;
-}
-
-export interface Plugin<TConfig = any, TInput = any, TOutput = any> {
-  metadata: PluginMetadata;
-  
-  initialize?(config: TConfig): Promise<Result<void, Error>>;
-  execute(input: TInput, context: Context): Promise<Result<TOutput, Error>>;
-  cleanup?(): Promise<void>;
-}
-
-export interface PluginFactory<TConfig = any> {
-  create(config: TConfig): Plugin;
+  baseUrl: string;
+  selectors: Record<string, string>;
+  pagination?: {
+    nextButtonSelector: string;
+    maxPages?: number;
+  };
+  proxy: {
+    enabled: boolean;
+    rotation: 'session' | 'request';
+    countries?: string[];
+  };
+  rateLimit: {
+    requestsPerMinute: number;
+    delayBetweenRequests: number;
+  };
+  outputs: OutputConfig[];
+  pipeline: {
+    processors: string[];
+    errorHandling: 'continue' | 'stop';
+    batchSize: number;
+  };
 }
 ```
 
-**src/core/context.ts**
+### Step 7: Create Configuration Loader
+Create `src/core/ConfigLoader.ts`:
+```typescript
+import fs from 'fs';
+import path from 'path';
+import { ScraperConfig } from '../outputs/base/interfaces';
+
+export class ConfigLoader {
+  private static configs = new Map<string, any>();
+
+  static load(configPath: string): ScraperConfig {
+    if (this.configs.has(configPath)) {
+      return this.configs.get(configPath);
+    }
+
+    const fullPath = path.resolve(configPath);
+    const config = JSON.parse(fs.readFileSync(fullPath, 'utf8'));
+    
+    // Handle inheritance with "extends"
+    if (config.extends) {
+      const baseConfig = this.loadGlobalConfig(config.extends);
+      const mergedConfig = this.mergeConfigs(baseConfig, config);
+      this.configs.set(configPath, mergedConfig);
+      return mergedConfig;
+    }
+
+    this.configs.set(configPath, config);
+    return config;
+  }
+
+  static loadGlobalConfig(type: string): any {
+    const globalPath = path.resolve(`configs/${type}.json`);
+    return JSON.parse(fs.readFileSync(globalPath, 'utf8'));
+  }
+
+  static getDbConnection(connectionName: string): any {
+    const outputConfig = this.loadGlobalConfig('outputs');
+    return outputConfig.database.connections[connectionName];
+  }
+
+  private static mergeConfigs(base: any, override: any): any {
+    return {
+      ...base,
+      ...override,
+      selectors: { ...base.selectors, ...override.selectors },
+      proxy: { ...base.proxy, ...override.proxy },
+      rateLimit: { ...base.rateLimit, ...override.rateLimit }
+    };
+  }
+}
+```
+
+### Step 8: Create Logger Utility
+Create `src/core/Logger.ts`:
 ```typescript
 import winston from 'winston';
-import { injectable } from 'tsyringe';
 
-@injectable()
-export class Context {
-  private data = new Map<string, any>();
-  
-  constructor(
-    public readonly logger: winston.Logger,
-    public readonly requestId: string = crypto.randomUUID()
-  ) {}
-  
-  set<T>(key: string, value: T): void {
-    this.data.set(key, value);
+export class Logger {
+  private static instance: winston.Logger;
+
+  static getInstance(): winston.Logger {
+    if (!this.instance) {
+      this.instance = winston.createLogger({
+        level: process.env.LOG_LEVEL || 'info',
+        format: winston.format.combine(
+          winston.format.timestamp(),
+          winston.format.json()
+        ),
+        transports: [
+          new winston.transports.Console({
+            format: winston.format.combine(
+              winston.format.colorize(),
+              winston.format.simple()
+            )
+          }),
+          new winston.transports.File({ filename: 'logs/scraper.log' })
+        ]
+      });
+    }
+    return this.instance;
   }
-  
-  get<T>(key: string): T | undefined {
-    return this.data.get(key);
+
+  static child(meta: object): winston.Logger {
+    return this.getInstance().child(meta);
   }
-  
-  has(key: string): boolean {
-    return this.data.has(key);
+}
+```
+
+## Phase 3: Output System
+
+### Step 9: Create Base Output Adapter
+Create `src/outputs/base/OutputAdapter.ts`:
+```typescript
+import { OutputConfig, BatchResult } from './interfaces';
+import { Logger } from '../../core/Logger';
+
+export abstract class OutputAdapter {
+  protected config: OutputConfig;
+  protected logger: any;
+
+  constructor(config: OutputConfig) {
+    this.config = config;
+    this.logger = Logger.child({ adapter: this.constructor.name });
   }
-  
-  child(meta: Record<string, any>): Context {
-    const childLogger = this.logger.child({ ...meta, requestId: this.requestId });
-    const childContext = new Context(childLogger, this.requestId);
+
+  abstract initialize(): Promise<void>;
+  abstract write(data: any[]): Promise<BatchResult>;
+  abstract flush(): Promise<void>;
+  abstract close(): Promise<void>;
+
+  async validateData(data: any[]): Promise<any[]> {
+    return data;
+  }
+
+  async healthCheck(): Promise<boolean> {
+    return true;
+  }
+}
+```
+
+### Step 10: Create CSV Output Adapter
+Create `src/outputs/adapters/CSVAdapter.ts`:
+```typescript
+import { OutputAdapter } from '../base/OutputAdapter';
+import { BatchResult } from '../base/interfaces';
+import { createWriteStream, WriteStream } from 'fs';
+import { format } from 'date-fns';
+import path from 'path';
+
+export class CSVAdapter extends OutputAdapter {
+  private writeStream: WriteStream;
+  private filePath: string;
+  private headerWritten = false;
+
+  async initialize(): Promise<void> {
+    this.filePath = this.resolveFilePath();
     
-    // Copy parent data
-    this.data.forEach((value, key) => {
-      childContext.set(key, value);
+    // Ensure directory exists
+    const dir = path.dirname(this.filePath);
+    await fs.promises.mkdir(dir, { recursive: true });
+    
+    this.writeStream = createWriteStream(this.filePath, { 
+      encoding: this.config.config.encoding || 'utf8' 
     });
     
-    return childContext;
+    this.logger.info('CSV adapter initialized', { filePath: this.filePath });
+  }
+
+  async write(data: any[]): Promise<BatchResult> {
+    if (!data.length) return { success: true, processedCount: 0, errorCount: 0 };
+
+    try {
+      // Write headers if first batch
+      if (!this.headerWritten && this.config.config.headers !== false) {
+        const headers = Object.keys(data[0]);
+        this.writeStream.write(headers.join(this.config.config.delimiter || ',') + '\n');
+        this.headerWritten = true;
+      }
+
+      // Write data rows
+      for (const row of data) {
+        const values = Object.values(row).map(val => 
+          typeof val === 'string' && val.includes(',') ? `"${val}"` : val
+        );
+        this.writeStream.write(values.join(this.config.config.delimiter || ',') + '\n');
+      }
+
+      return {
+        success: true,
+        processedCount: data.length,
+        errorCount: 0
+      };
+    } catch (error) {
+      this.logger.error('CSV write failed', { error });
+      return {
+        success: false,
+        processedCount: 0,
+        errorCount: data.length,
+        errors: [error]
+      };
+    }
+  }
+
+  async flush(): Promise<void> {
+    return new Promise((resolve) => {
+      this.writeStream.once('drain', resolve);
+    });
+  }
+
+  async close(): Promise<void> {
+    return new Promise((resolve) => {
+      this.writeStream.end(resolve);
+    });
+  }
+
+  private resolveFilePath(): string {
+    let filename = this.config.config.filename || 'export-{timestamp}.csv';
+    
+    filename = filename
+      .replace('{date}', format(new Date(), 'yyyy-MM-dd'))
+      .replace('{timestamp}', Date.now().toString())
+      .replace('{scraper}', this.config.config.scraperName || 'unknown');
+    
+    return path.join(this.config.config.path || './exports', filename);
   }
 }
 ```
 
-**src/core/pipeline.ts**
+### Step 11: Create Database Output Adapter
+Create `src/outputs/adapters/DatabaseAdapter.ts`:
 ```typescript
-import { Result, ok, err } from 'neverthrow';
-import { Plugin } from './plugin';
-import { Context } from './context';
+import { OutputAdapter } from '../base/OutputAdapter';
+import { BatchResult } from '../base/interfaces';
+import { ConfigLoader } from '../../core/ConfigLoader';
+import { Pool } from 'pg'; // PostgreSQL example
 
-export interface PipelineStep {
-  plugin: Plugin;
-  name: string;
+export class DatabaseAdapter extends OutputAdapter {
+  private db: Pool;
+  private tableName: string;
+
+  async initialize(): Promise<void> {
+    const connConfig = ConfigLoader.getDbConnection(this.config.config.connection);
+    
+    this.db = new Pool({
+      host: connConfig.host,
+      port: connConfig.port,
+      database: connConfig.database,
+      user: connConfig.user,
+      password: connConfig.password,
+      ...connConfig.pool
+    });
+    
+    this.tableName = this.config.config.table;
+    
+    // Test connection
+    await this.db.query('SELECT 1');
+    this.logger.info('Database adapter initialized', { table: this.tableName });
+
+    // Auto-create table if needed
+    if (this.config.config.autoCreateTable) {
+      await this.ensureTable();
+    }
+  }
+
+  async write(data: any[]): Promise<BatchResult> {
+    if (!data.length) return { success: true, processedCount: 0, errorCount: 0 };
+
+    const batchSize = this.config.config.batchSize || 100;
+    const results: BatchResult = {
+      success: true,
+      processedCount: 0,
+      errorCount: 0,
+      errors: []
+    };
+
+    for (let i = 0; i < data.length; i += batchSize) {
+      const batch = data.slice(i, i + batchSize);
+      
+      try {
+        if (this.config.config.upsert) {
+          await this.upsertBatch(batch);
+        } else {
+          await this.insertBatch(batch);
+        }
+        results.processedCount += batch.length;
+      } catch (error) {
+        results.success = false;
+        results.errorCount += batch.length;
+        results.errors?.push(error);
+        this.logger.error('Database batch write failed', { error, batchSize: batch.length });
+      }
+    }
+
+    return results;
+  }
+
+  private async insertBatch(data: any[]): Promise<void> {
+    const columns = Object.keys(data[0]);
+    const placeholders = data.map((_, i) => 
+      `(${columns.map((_, j) => `$${i * columns.length + j + 1}`).join(', ')})`
+    ).join(', ');
+    
+    const values = data.flatMap(row => columns.map(col => row[col]));
+    const query = `INSERT INTO ${this.tableName} (${columns.join(', ')}) VALUES ${placeholders}`;
+    
+    await this.db.query(query, values);
+  }
+
+  private async upsertBatch(data: any[]): Promise<void> {
+    // Implementation depends on database type and conflict resolution strategy
+    const columns = Object.keys(data[0]);
+    const conflictColumn = this.config.config.conflictColumn || 'id';
+    
+    for (const row of data) {
+      const updateSet = columns
+        .filter(col => col !== conflictColumn)
+        .map(col => `${col} = EXCLUDED.${col}`)
+        .join(', ');
+        
+      const placeholders = columns.map((_, i) => `$${i + 1}`).join(', ');
+      const values = columns.map(col => row[col]);
+      
+      const query = `
+        INSERT INTO ${this.tableName} (${columns.join(', ')}) 
+        VALUES (${placeholders})
+        ON CONFLICT (${conflictColumn}) 
+        DO UPDATE SET ${updateSet}
+      `;
+      
+      await this.db.query(query, values);
+    }
+  }
+
+  async flush(): Promise<void> {
+    // PostgreSQL doesn't need explicit flush
+  }
+
+  async close(): Promise<void> {
+    await this.db.end();
+  }
+
+  private async ensureTable(): Promise<void> {
+    // This is a basic implementation - in production, use proper migrations
+    const schema = this.config.config.schema;
+    if (schema) {
+      const createTableQuery = this.generateCreateTableQuery(schema);
+      await this.db.query(createTableQuery);
+    }
+  }
+
+  private generateCreateTableQuery(schema: any): string {
+    // Generate CREATE TABLE IF NOT EXISTS query from schema
+    // This is simplified - implement based on your schema format
+    return `CREATE TABLE IF NOT EXISTS ${this.tableName} (id SERIAL PRIMARY KEY)`;
+  }
 }
+```
+
+### Step 12: Create Output Adapter Factory
+Create `src/outputs/OutputAdapterFactory.ts`:
+```typescript
+import { OutputAdapter } from './base/OutputAdapter';
+import { OutputConfig } from './base/interfaces';
+import { CSVAdapter } from './adapters/CSVAdapter';
+import { DatabaseAdapter } from './adapters/DatabaseAdapter';
+
+export class OutputAdapterFactory {
+  private static adapters = new Map<string, typeof OutputAdapter>([
+    ['csv', CSVAdapter],
+    ['database', DatabaseAdapter],
+    // Add more adapters here
+  ]);
+
+  static register(type: string, adapterClass: typeof OutputAdapter): void {
+    this.adapters.set(type, adapterClass);
+  }
+
+  static create(config: OutputConfig): OutputAdapter {
+    const AdapterClass = this.adapters.get(config.type);
+    if (!AdapterClass) {
+      throw new Error(`Unknown output adapter: ${config.type}`);
+    }
+    return new AdapterClass(config);
+  }
+
+  static getAvailableTypes(): string[] {
+    return Array.from(this.adapters.keys());
+  }
+}
+```
+
+## Phase 4: Pipeline System
+
+### Step 13: Create Data Pipeline
+Create `src/outputs/pipelines/Pipeline.ts`:
+```typescript
+import { OutputAdapter } from '../base/OutputAdapter';
+import { PipelineResult, BatchResult } from '../base/interfaces';
+import { Logger } from '../../core/Logger';
 
 export class Pipeline {
-  private steps: PipelineStep[] = [];
-  
-  add(name: string, plugin: Plugin): this {
-    this.steps.push({ name, plugin });
+  private logger = Logger.child({ component: 'Pipeline' });
+
+  constructor(
+    private outputs: OutputAdapter[],
+    private batchSize: number = 50
+  ) {}
+
+  async initialize(): Promise<void> {
+    await Promise.all(this.outputs.map(output => output.initialize()));
+    this.logger.info('Pipeline initialized', { outputCount: this.outputs.length });
+  }
+
+  async process(data: any[]): Promise<PipelineResult> {
+    if (!data.length) {
+      return { totalProcessed: 0, totalErrors: 0, outputResults: {} };
+    }
+
+    // Process in batches
+    const results: Record<string, BatchResult> = {};
+    let totalProcessed = 0;
+    let totalErrors = 0;
+
+    for (let i = 0; i < data.length; i += this.batchSize) {
+      const batch = data.slice(i, i + this.batchSize);
+      
+      // Write to all outputs in parallel
+      const outputPromises = this.outputs.map(async (output, index) => {
+        try {
+          const result = await output.write(batch);
+          results[`output_${index}`] = result;
+          return result;
+        } catch (error) {
+          this.logger.error('Output write failed', { error, outputIndex: index });
+          const errorResult: BatchResult = {
+            success: false,
+            processedCount: 0,
+            errorCount: batch.length,
+            errors: [error]
+          };
+          results[`output_${index}`] = errorResult;
+          return errorResult;
+        }
+      });
+
+      const batchResults = await Promise.all(outputPromises);
+      
+      // Aggregate results
+      batchResults.forEach(result => {
+        totalProcessed += result.processedCount;
+        totalErrors += result.errorCount;
+      });
+    }
+
+    return {
+      totalProcessed,
+      totalErrors,
+      outputResults: results
+    };
+  }
+
+  async close(): Promise<void> {
+    await Promise.all(this.outputs.map(output => output.close()));
+    this.logger.info('Pipeline closed');
+  }
+}
+```
+
+### Step 14: Create Pipeline Builder
+Create `src/outputs/pipelines/PipelineBuilder.ts`:
+```typescript
+import { Pipeline } from './Pipeline';
+import { OutputAdapter } from '../base/OutputAdapter';
+import { OutputAdapterFactory } from '../OutputAdapterFactory';
+import { ScraperConfig } from '../base/interfaces';
+
+export class PipelineBuilder {
+  private outputs: OutputAdapter[] = [];
+
+  addOutput(adapter: OutputAdapter): this {
+    this.outputs.push(adapter);
     return this;
   }
-  
-  async execute<T>(input: T, context: Context): Promise<Result<T, Error>> {
-    let current = input;
+
+  build(batchSize?: number): Pipeline {
+    return new Pipeline(this.outputs, batchSize);
+  }
+
+  static fromConfig(config: ScraperConfig): Pipeline {
+    const builder = new PipelineBuilder();
     
-    for (const step of this.steps) {
-      const stepContext = context.child({ step: step.name });
-      stepContext.logger.debug('Executing pipeline step', { step: step.name });
-      
-      const result = await step.plugin.execute(current, stepContext);
-      if (result.isErr()) {
-        return err(new Error(`Pipeline failed at ${step.name}: ${result.error.message}`));
+    // Add outputs based on config
+    config.outputs?.forEach(outputConfig => {
+      if (outputConfig.enabled) {
+        // Inject scraper name into output config
+        outputConfig.config.scraperName = config.name;
+        
+        const adapter = OutputAdapterFactory.create(outputConfig);
+        builder.addOutput(adapter);
       }
-      
-      current = result.value;
-    }
-    
-    return ok(current);
+    });
+
+    return builder.build(config.pipeline.batchSize);
   }
 }
 ```
 
-**src/core/types.ts**
+## Phase 5: Scraper Base Classes
+
+### Step 15: Create Base Scraper
+Create `src/scrapers/base/BaseScraper.ts`:
 ```typescript
-export interface ScrapedData {
-  url: string;
-  timestamp: Date;
-  data: Record<string, any>;
-  metadata?: Record<string, any>;
-}
-
-export interface Selector {
-  selector: string;
-  attribute?: string;
-  transform?: (value: string) => any;
-}
-
-export interface ExtractorConfig {
-  selectors: Record<string, Selector | string>;
-  waitForSelector?: string;
-  timeout?: number;
-}
-```
-
-### 2. Plugin System Implementation
-**src/runtime/registry.ts**
-```typescript
-import { injectable, singleton } from 'tsyringe';
-import { Plugin, PluginFactory } from '@core/plugin';
-import { Result, ok, err } from 'neverthrow';
-
-@singleton()
-@injectable()
-export class PluginRegistry {
-  private plugins = new Map<string, PluginFactory>();
-  private instances = new Map<string, Plugin>();
-  
-  register(name: string, factory: PluginFactory): void {
-    this.plugins.set(name, factory);
-  }
-  
-  create(name: string, config?: any): Result<Plugin, Error> {
-    const factory = this.plugins.get(name);
-    if (!factory) {
-      return err(new Error(`Plugin not found: ${name}`));
-    }
-    
-    try {
-      const plugin = factory.create(config);
-      this.instances.set(name, plugin);
-      return ok(plugin);
-    } catch (error) {
-      return err(new Error(`Failed to create plugin ${name}: ${error}`));
-    }
-  }
-  
-  get(name: string): Plugin | undefined {
-    return this.instances.get(name);
-  }
-  
-  list(): string[] {
-    return Array.from(this.plugins.keys());
-  }
-}
-```
-
-**src/runtime/loader.ts**
-```typescript
-import { injectable } from 'tsyringe';
-import { PluginRegistry } from './registry';
-import { Result, ok, err } from 'neverthrow';
-import * as path from 'path';
-import * as fs from 'fs/promises';
-
-@injectable()
-export class PluginLoader {
-  constructor(private registry: PluginRegistry) {}
-  
-  async loadFromDirectory(dir: string): Promise<Result<void, Error>> {
-    try {
-      const entries = await fs.readdir(dir, { withFileTypes: true });
-      
-      for (const entry of entries) {
-        if (entry.isDirectory()) {
-          const pluginPath = path.join(dir, entry.name);
-          await this.loadPlugin(pluginPath);
-        }
-      }
-      
-      return ok(undefined);
-    } catch (error) {
-      return err(new Error(`Failed to load plugins: ${error}`));
-    }
-  }
-  
-  private async loadPlugin(pluginPath: string): Promise<void> {
-    try {
-      const indexPath = path.join(pluginPath, 'index.ts');
-      const module = await import(indexPath);
-      
-      if (module.default && typeof module.default.create === 'function') {
-        const metadata = module.default.metadata || {};
-        this.registry.register(metadata.name, module.default);
-      }
-    } catch (error) {
-      // Skip invalid plugins
-      console.warn(`Failed to load plugin from ${pluginPath}:`, error);
-    }
-  }
-}
-```
-
-### 3. Execution Engine
-**src/runtime/engine.ts**
-```typescript
-import { injectable, inject } from 'tsyringe';
 import { PlaywrightCrawler, CheerioCrawler } from 'crawlee';
-import { Result, ok, err } from 'neverthrow';
-import { Pipeline } from '@core/pipeline';
-import { Context } from '@core/context';
-import { PluginRegistry } from './registry';
-import winston from 'winston';
+import { ConfigLoader } from '../../core/ConfigLoader';
+import { PipelineBuilder } from '../../outputs/pipelines/PipelineBuilder';
+import { Pipeline } from '../../outputs/pipelines/Pipeline';
+import { ScraperConfig } from '../../outputs/base/interfaces';
+import { Logger } from '../../core/Logger';
 
-export interface EngineConfig {
-  crawlerType: 'playwright' | 'cheerio';
-  maxRequestsPerCrawl?: number;
-  maxConcurrency?: number;
-  requestHandlerTimeoutSecs?: number;
-}
+export abstract class BaseScraper {
+  protected config: ScraperConfig;
+  protected pipeline: Pipeline;
+  protected crawler: PlaywrightCrawler | CheerioCrawler;
+  protected logger: any;
 
-@injectable()
-export class ScrapingEngine {
-  private crawler?: PlaywrightCrawler | CheerioCrawler;
-  
-  constructor(
-    @inject('Logger') private logger: winston.Logger,
-    private registry: PluginRegistry
-  ) {}
-  
-  async initialize(config: EngineConfig): Promise<Result<void, Error>> {
-    try {
-      const crawlerOptions = {
-        maxRequestsPerCrawl: config.maxRequestsPerCrawl || 100,
-        maxConcurrency: config.maxConcurrency || 1,
-        requestHandlerTimeoutSecs: config.requestHandlerTimeoutSecs || 60,
-        requestHandler: this.createRequestHandler()
-      };
-      
-      if (config.crawlerType === 'playwright') {
-        this.crawler = new PlaywrightCrawler(crawlerOptions);
-      } else {
-        this.crawler = new CheerioCrawler(crawlerOptions);
-      }
-      
-      return ok(undefined);
-    } catch (error) {
-      return err(new Error(`Failed to initialize engine: ${error}`));
+  constructor(configPath: string) {
+    this.config = ConfigLoader.load(configPath);
+    this.logger = Logger.child({ scraper: this.config.name });
+    this.setupPipeline();
+  }
+
+  abstract setupHandlers(): Record<string, Function>;
+  abstract extractData(context: any): Promise<any>;
+
+  protected async setupPipeline(): Promise<void> {
+    this.pipeline = PipelineBuilder.fromConfig(this.config);
+    await this.pipeline.initialize();
+  }
+
+  protected setupCrawler(): void {
+    const handlers = this.setupHandlers();
+    
+    // Choose crawler type based on config or default to Playwright
+    const crawlerType = this.config.crawlerType || 'playwright';
+    
+    if (crawlerType === 'playwright') {
+      this.crawler = new PlaywrightCrawler({
+        requestHandler: async (context) => {
+          const data = await this.extractData(context);
+          if (data) {
+            await this.pipeline.process([data]);
+          }
+        },
+        maxRequestsPerCrawl: this.config.maxRequestsPerCrawl || 100,
+        requestHandlerTimeoutSecs: 60,
+        ...this.getProxyConfig(),
+        ...this.getRateLimitConfig()
+      });
+    } else {
+      this.crawler = new CheerioCrawler({
+        requestHandler: async (context) => {
+          const data = await this.extractData(context);
+          if (data) {
+            await this.pipeline.process([data]);
+          }
+        },
+        maxRequestsPerCrawl: this.config.maxRequestsPerCrawl || 100,
+        ...this.getProxyConfig(),
+        ...this.getRateLimitConfig()
+      });
     }
   }
-  
-  private createRequestHandler() {
-    return async (crawlerContext: any) => {
-      const { request } = crawlerContext;
-      const context = new Context(this.logger);
-      context.set('url', request.url);
-      context.set('crawlerContext', crawlerContext);
-      
-      // Execute pipeline
-      const pipeline = context.get<Pipeline>('pipeline');
-      if (pipeline) {
-        const result = await pipeline.execute(crawlerContext, context);
-        if (result.isErr()) {
-          this.logger.error('Pipeline execution failed', {
-            url: request.url,
-            error: result.error.message
-          });
-        }
+
+  async run(urls: string[]): Promise<void> {
+    this.setupCrawler();
+    
+    this.logger.info('Starting scraper', { 
+      urls: urls.length, 
+      scraper: this.config.name 
+    });
+    
+    try {
+      await this.crawler.run(urls);
+      this.logger.info('Scraper completed successfully');
+    } catch (error) {
+      this.logger.error('Scraper failed', { error });
+      throw error;
+    } finally {
+      await this.close();
+    }
+  }
+
+  async close(): Promise<void> {
+    await this.pipeline.close();
+  }
+
+  private getProxyConfig(): any {
+    if (!this.config.proxy.enabled) return {};
+    
+    // Implement proxy configuration based on your proxy service
+    return {
+      proxyConfiguration: {
+        // Add proxy configuration here
       }
     };
   }
-  
-  async run(urls: string[], pipeline: Pipeline): Promise<Result<void, Error>> {
-    if (!this.crawler) {
-      return err(new Error('Engine not initialized'));
-    }
-    
-    try {
-      // Store pipeline in context for request handler
-      const context = new Context(this.logger);
-      context.set('pipeline', pipeline);
-      
-      await this.crawler.run(urls);
-      return ok(undefined);
-    } catch (error) {
-      return err(new Error(`Scraping failed: ${error}`));
-    }
+
+  private getRateLimitConfig(): any {
+    return {
+      maxRequestsPerMinute: this.config.rateLimit.requestsPerMinute,
+      requestHandlerTimeoutSecs: 60
+    };
   }
 }
 ```
 
-### 4. Plugin Implementations
-**src/plugins/extractors/cheerio-extractor.ts**
+### Step 16: Create Scraper Factory
+Create `src/core/ScraperFactory.ts`:
 ```typescript
-import { Plugin, PluginMetadata } from '@core/plugin';
-import { Context } from '@core/context';
-import { Result, ok, err } from 'neverthrow';
-import { z } from 'zod';
-import { ExtractorConfig, ScrapedData } from '@core/types';
+import { BaseScraper } from '../scrapers/base/BaseScraper';
+import fs from 'fs';
+import path from 'path';
 
-const ConfigSchema = z.object({
-  selectors: z.record(z.union([
-    z.string(),
-    z.object({
-      selector: z.string(),
-      attribute: z.string().optional(),
-      transform: z.function().optional()
-    })
-  ])),
-  waitForSelector: z.string().optional(),
-  timeout: z.number().default(30000)
-});
+export class ScraperFactory {
+  private static scrapers = new Map<string, () => BaseScraper>();
 
-export class CheerioExtractorPlugin implements Plugin<ExtractorConfig> {
-  metadata: PluginMetadata = {
-    name: 'cheerio-extractor',
-    version: '1.0.0',
-    type: 'extractor',
-    description: 'Extracts data using Cheerio selectors',
-    configSchema: ConfigSchema
-  };
-  
-  constructor(private config: ExtractorConfig) {}
-  
-  async execute(input: any, context: Context): Promise<Result<ScrapedData, Error>> {
-    const { $ } = input; // Cheerio instance from crawler
-    const url = context.get<string>('url') || '';
-    
-    try {
-      const data: Record<string, any> = {};
-      
-      for (const [key, selectorConfig] of Object.entries(this.config.selectors)) {
-        const selector = typeof selectorConfig === 'string' 
-          ? selectorConfig 
-          : selectorConfig.selector;
-          
-        const element = $(selector);
-        if (element.length === 0) {
-          context.logger.warn(`Selector not found: ${key}`, { selector });
-          continue;
-        }
-        
-        let value: any;
-        if (typeof selectorConfig === 'object' && selectorConfig.attribute) {
-          value = element.attr(selectorConfig.attribute);
-        } else {
-          value = element.text().trim();
-        }
-        
-        if (typeof selectorConfig === 'object' && selectorConfig.transform) {
-          value = selectorConfig.transform(value);
-        }
-        
-        data[key] = value;
-      }
-      
-      return ok({
-        url,
-        timestamp: new Date(),
-        data,
-        metadata: { extractorType: 'cheerio' }
+  static register(name: string, scraperFactory: () => BaseScraper): void {
+    this.scrapers.set(name, scraperFactory);
+  }
+
+  static create(scraperName: string): BaseScraper {
+    const scraperFactory = this.scrapers.get(scraperName);
+    if (scraperFactory) {
+      return scraperFactory();
+    }
+
+    // Try to dynamically load scraper
+    const scraperPath = path.join(process.cwd(), 'src', 'scrapers', scraperName);
+    if (fs.existsSync(`${scraperPath}/index.ts`)) {
+      const scraperModule = require(`${scraperPath}/index.ts`);
+      const ScraperClass = scraperModule.default || scraperModule[Object.keys(scraperModule)[0]];
+      return new ScraperClass();
+    }
+
+    throw new Error(`Scraper '${scraperName}' not found`);
+  }
+
+  static getAvailableScrapers(): string[] {
+    const scrapersDir = path.join(process.cwd(), 'src', 'scrapers');
+    if (!fs.existsSync(scrapersDir)) return [];
+
+    return fs.readdirSync(scrapersDir)
+      .filter(item => {
+        const itemPath = path.join(scrapersDir, item);
+        return fs.statSync(itemPath).isDirectory() && 
+               item !== 'base' && 
+               fs.existsSync(path.join(itemPath, 'index.ts'));
       });
-    } catch (error) {
-      return err(new Error(`Extraction failed: ${error}`));
-    }
-  }
-}
-
-export default {
-  metadata: CheerioExtractorPlugin.prototype.metadata,
-  create: (config: ExtractorConfig) => new CheerioExtractorPlugin(config)
-};
-```
-
-**src/plugins/outputs/csv-plugin.ts**
-```typescript
-import { Plugin, PluginMetadata } from '@core/plugin';
-import { Context } from '@core/context';
-import { Result, ok, err } from 'neverthrow';
-import { createWriteStream, WriteStream } from 'fs';
-import { mkdir } from 'fs/promises';
-import { dirname } from 'path';
-import { z } from 'zod';
-import { ScrapedData } from '@core/types';
-
-const ConfigSchema = z.object({
-  path: z.string(),
-  headers: z.boolean().default(true),
-  delimiter: z.string().default(','),
-  batchSize: z.number().default(100)
-});
-
-export class CSVOutputPlugin implements Plugin {
-  metadata: PluginMetadata = {
-    name: 'csv-output',
-    version: '1.0.0',
-    type: 'output',
-    description: 'Writes scraped data to CSV files',
-    configSchema: ConfigSchema
-  };
-  
-  private stream?: WriteStream;
-  private headerWritten = false;
-  private buffer: any[] = [];
-  
-  constructor(private config: z.infer<typeof ConfigSchema>) {}
-  
-  async initialize(): Promise<Result<void, Error>> {
-    try {
-      await mkdir(dirname(this.config.path), { recursive: true });
-      this.stream = createWriteStream(this.config.path);
-      return ok(undefined);
-    } catch (error) {
-      return err(new Error(`Failed to initialize CSV output: ${error}`));
-    }
-  }
-  
-  async execute(input: ScrapedData[], context: Context): Promise<Result<void, Error>> {
-    try {
-      this.buffer.push(...input);
-      
-      if (this.buffer.length >= this.config.batchSize) {
-        return this.flush();
-      }
-      
-      return ok(undefined);
-    } catch (error) {
-      return err(new Error(`CSV write failed: ${error}`));
-    }
-  }
-  
-  private async flush(): Promise<Result<void, Error>> {
-    if (!this.stream || this.buffer.length === 0) {
-      return ok(undefined);
-    }
-    
-    try {
-      // Write headers on first flush
-      if (this.config.headers && !this.headerWritten && this.buffer.length > 0) {
-        const headers = Object.keys(this.buffer[0].data).join(this.config.delimiter);
-        this.stream.write(`url,timestamp,${headers}\n`);
-        this.headerWritten = true;
-      }
-      
-      // Write data rows
-      for (const item of this.buffer) {
-        const values = [
-          item.url,
-          item.timestamp.toISOString(),
-          ...Object.values(item.data).map(v => this.escapeValue(String(v)))
-        ].join(this.config.delimiter);
-        
-        this.stream.write(values + '\n');
-      }
-      
-      this.buffer = [];
-      return ok(undefined);
-    } catch (error) {
-      return err(new Error(`Failed to flush CSV: ${error}`));
-    }
-  }
-  
-  async cleanup(): Promise<void> {
-    await this.flush();
-    
-    return new Promise((resolve) => {
-      if (!this.stream) {
-        resolve();
-        return;
-      }
-      
-      this.stream.end(() => resolve());
-    });
-  }
-  
-  private escapeValue(value: string): string {
-    if (value.includes(this.config.delimiter) || value.includes('"')) {
-      return `"${value.replace(/"/g, '""')}"`;
-    }
-    return value;
-  }
-}
-
-export default {
-  metadata: CSVOutputPlugin.prototype.metadata,
-  create: (config: z.infer<typeof ConfigSchema>) => new CSVOutputPlugin(config)
-};
-
-```
-
-### 5. API Builder
-**src/api/builder.ts**
-```typescript
-import { container } from 'tsyringe';
-import { Pipeline } from '@core/pipeline';
-import { Context } from '@core/context';
-import { PluginRegistry } from '@runtime/registry';
-import { ScrapingEngine, EngineConfig } from '@runtime/engine';
-import { Result } from 'neverthrow';
-import winston from 'winston';
-
-export class ScraperBuilder {
-  private pipeline = new Pipeline();
-  private engineConfig: EngineConfig = { crawlerType: 'cheerio' };
-  private logger: winston.Logger;
-  
-  constructor(name: string = 'scraper') {
-    this.logger = winston.createLogger({
-      level: process.env.LOG_LEVEL || 'info',
-      defaultMeta: { service: name },
-      format: winston.format.combine(
-        winston.format.timestamp(),
-        winston.format.json()
-      ),
-      transports: [
-        new winston.transports.Console({
-          format: winston.format.simple()
-        })
-      ]
-    });
-    
-    container.register('Logger', { useValue: this.logger });
-  }
-  
-  usePlaywright(): this {
-    this.engineConfig.crawlerType = 'playwright';
-    return this;
-  }
-  
-  useCheerio(): this {
-    this.engineConfig.crawlerType = 'cheerio';
-    return this;
-  }
-  
-  extract(pluginName: string, config?: any): this {
-    const registry = container.resolve(PluginRegistry);
-    const result = registry.create(pluginName, config);
-    
-    if (result.isOk()) {
-      this.pipeline.add(`extract-${pluginName}`, result.value);
-    } else {
-      throw new Error(`Failed to create extractor: ${result.error.message}`);
-    }
-    
-    return this;
-  }
-  
-  transform(pluginName: string, config?: any): this {
-    const registry = container.resolve(PluginRegistry);
-    const result = registry.create(pluginName, config);
-    
-    if (result.isOk()) {
-      this.pipeline.add(`transform-${pluginName}`, result.value);
-    } else {
-      throw new Error(`Failed to create transformer: ${result.error.message}`);
-    }
-    
-    return this;
-  }
-  
-  output(pluginName: string, config?: any): this {
-    const registry = container.resolve(PluginRegistry);
-    const result = registry.create(pluginName, config);
-    
-    if (result.isOk()) {
-      this.pipeline.add(`output-${pluginName}`, result.value);
-    } else {
-      throw new Error(`Failed to create output: ${result.error.message}`);
-    }
-    
-    return this;
-  }
-  
-  async run(urls: string[]): Promise<Result<void, Error>> {
-    const engine = container.resolve(ScrapingEngine);
-    
-    const initResult = await engine.initialize(this.engineConfig);
-    if (initResult.isErr()) {
-      return initResult;
-    }
-    
-    return engine.run(urls, this.pipeline);
   }
 }
 ```
 
-### 6. Public API
-**src/api/index.ts**
+## Phase 6: CLI Interface
+
+### Step 17: Create CLI
+Create `src/cli/index.ts`:
 ```typescript
-import 'reflect-metadata';
-import { container } from 'tsyringe';
-import { PluginRegistry } from '@runtime/registry';
-import { PluginLoader } from '@runtime/loader';
-import { ScraperBuilder } from './builder';
-
-// Initialize DI container
-const registry = new PluginRegistry();
-container.registerSingleton(PluginRegistry);
-container.registerSingleton(PluginLoader);
-
-// Export public API
-export { ScraperBuilder } from './builder';
-export { Plugin, PluginMetadata } from '@core/plugin';
-export { Context } from '@core/context';
-export { Result, ok, err } from '@core/result';
-export * from '@core/types';
-
-// Factory function
-export function createScraper(name?: string): ScraperBuilder {
-  return new ScraperBuilder(name);
-}
-
-// Load built-in plugins
-export async function loadPlugins(directory: string = './src/plugins'): Promise<void> {
-  const loader = container.resolve(PluginLoader);
-  const result = await loader.loadFromDirectory(directory);
-  
-  if (result.isErr()) {
-    throw result.error;
-  }
-}
-```
-
-### 7. CLI Interface
-**src/cli/index.ts**
-```typescript
-#!/usr/bin/env node
-import 'reflect-metadata';
 import { Command } from 'commander';
-import { createScraper, loadPlugins } from '@api/index';
-import * as fs from 'fs/promises';
-import * as path from 'path';
+import { ScraperFactory } from '../core/ScraperFactory';
+import { OutputAdapterFactory } from '../outputs/OutputAdapterFactory';
+import { Logger } from '../core/Logger';
+import fs from 'fs';
+import path from 'path';
 
 const program = new Command();
+const logger = Logger.getInstance();
 
 program
   .name('scraper')
-  .description('Plugin-based web scraper')
+  .description('Industrial-scale web scraper CLI')
   .version('1.0.0');
 
 program
-  .command('run <config>')
-  .description('Run scraper with configuration file')
+  .command('run <scraper>')
+  .description('Run a specific scraper')
+  .option('-e, --env <environment>', 'Environment (dev/staging/prod)', 'dev')
   .option('-u, --urls <urls...>', 'URLs to scrape')
-  .action(async (configFile, options) => {
+  .option('-c, --config <config>', 'Custom config file path')
+  .action(async (scraperName, options) => {
     try {
-      // Load plugins
-      await loadPlugins();
+      logger.info('Starting scraper', { scraper: scraperName, env: options.env });
       
-      // Load configuration
-      const configPath = path.resolve(configFile);
-      const configModule = await import(configPath);
-      const config = configModule.default || configModule;
+      const scraper = ScraperFactory.create(scraperName);
       
-      // Build and run scraper
-      const scraper = createScraper(config.name);
+      // Load URLs from options or config
+      const urls = options.urls || ['https://example.com'];
       
-      // Apply configuration
-      if (config.crawler) {
-        config.crawler === 'playwright' 
-          ? scraper.usePlaywright() 
-          : scraper.useCheerio();
-      }
-      
-      if (config.extract) {
-        scraper.extract(config.extract.plugin, config.extract.config);
-      }
-      
-      if (config.transforms) {
-        for (const transform of config.transforms) {
-          scraper.transform(transform.plugin, transform.config);
-        }
-      }
-      
-      if (config.outputs) {
-        for (const output of config.outputs) {
-          scraper.output(output.plugin, output.config);
-        }
-      }
-      
-      // Run scraper
-      const urls = options.urls || config.urls || [];
-      const result = await scraper.run(urls);
-      
-      if (result.isErr()) {
-        console.error('❌ Scraping failed:', result.error.message);
-        process.exit(1);
-      }
-      
-      console.log('✅ Scraping completed successfully');
+      await scraper.run(urls);
+      logger.info('Scraper completed successfully');
     } catch (error) {
-      console.error('❌ Error:', error);
+      logger.error('Scraper failed', { error: error.message });
       process.exit(1);
     }
   });
 
 program
-  .command('plugins')
-  .description('List available plugins')
-  .action(async () => {
-    await loadPlugins();
-    console.log('Available plugins:');
-    // Would need to expose plugin list from registry
+  .command('list')
+  .description('List available scrapers')
+  .action(() => {
+    const scrapers = ScraperFactory.getAvailableScrapers();
+    console.log('Available scrapers:');
+    scrapers.forEach(scraper => console.log(`  - ${scraper}`));
   });
 
 program
-  .command('create-plugin <name>')
-  .description('Create a new plugin template')
-  .option('-t, --type <type>', 'Plugin type', 'extractor')
-  .action(async (name, options) => {
-    const template = `import { Plugin, PluginMetadata } from '@core/plugin';
-import { Context } from '@core/context';
-import { Result, ok, err } from 'neverthrow';
-import { z } from 'zod';
-
-const ConfigSchema = z.object({
-  // Define your config schema here
-});
-
-export class ${name}Plugin implements Plugin {
-  metadata: PluginMetadata = {
-    name: '${name}',
-    version: '1.0.0',
-    type: '${options.type}',
-    description: 'Description of your plugin',
-    configSchema: ConfigSchema
-  };
-  
-  constructor(private config: z.infer<typeof ConfigSchema>) {}
-  
-  async execute(input: any, context: Context): Promise<Result<any, Error>> {
+  .command('validate <scraper>')
+  .description('Validate scraper configuration')
+  .action((scraperName) => {
     try {
-      // Your plugin logic here
-      return ok(input);
+      const configPath = `src/scrapers/${scraperName}/config.json`;
+      if (!fs.existsSync(configPath)) {
+        throw new Error(`Config file not found: ${configPath}`);
+      }
+      
+      const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+      
+      // Basic validation
+      const required = ['name', 'baseUrl', 'selectors', 'outputs'];
+      const missing = required.filter(field => !config[field]);
+      
+      if (missing.length > 0) {
+        throw new Error(`Missing required fields: ${missing.join(', ')}`);
+      }
+      
+      console.log(`✓ Configuration for '${scraperName}' is valid`);
     } catch (error) {
-      return err(new Error(\`Plugin failed: \${error}\`));
+      console.error(`✗ Configuration error: ${error.message}`);
+      process.exit(1);
     }
-  }
-}
+  });
 
-export default {
-  metadata: ${name}Plugin.prototype.metadata,
-  create: (config: z.infer<typeof ConfigSchema>) => new ${name}Plugin(config)
-};
-`;
+program
+  .command('generate <name>')
+  .description('Generate a new scraper template')
+  .option('-t, --type <type>', 'Scraper type (playwright/cheerio)', 'playwright')
+  .action(async (name, options) => {
+    const scraperDir = path.join('src', 'scrapers', name);
     
-    const dir = `./src/plugins/${options.type}s`;
-    await fs.mkdir(dir, { recursive: true });
-    await fs.writeFile(path.join(dir, `${name}.ts`), template);
+    if (fs.existsSync(scraperDir)) {
+      console.error(`Scraper '${name}' already exists`);
+      process.exit(1);
+    }
     
-    console.log(`✅ Created plugin template at ${dir}/${name}.ts`);
+    // Create scraper directory structure
+    fs.mkdirSync(scraperDir, { recursive: true });
+    
+    // Generate config template
+    const configTemplate = {
+      name,
+      baseUrl: "https://example.com",
+      crawlerType: options.type,
+      selectors: {
+        title: "h1",
+        content: ".content"
+      },
+      outputs: [
+        {
+          type: "csv",
+          enabled: true,
+          config: {
+            filename: `${name}-{date}.csv`,
+            path: "./exports"
+          }
+        }
+      ],
+      pipeline: {
+        processors: [],
+        errorHandling: "continue",
+        batchSize: 50
+      },
+      proxy: {
+        enabled: false,
+        rotation: "session"
+      },
+      rateLimit: {
+        requestsPerMinute: 30,
+        delayBetweenRequests: 2000
+      }
+    };
+    
+    fs.writeFileSync(
+      path.join(scraperDir, 'config.json'),
+      JSON.stringify(configTemplate, null, 2)
+    );
+    
+    // Generate scraper class template
+    const scraperTemplate = `import { BaseScraper } from '../base/BaseScraper';
+
+export default class ${name.charAt(0).toUpperCase() + name.slice(1)}Scraper extends BaseScraper {
+  constructor() {
+    super('./src/scrapers/${name}/config.json');
+  }
+
+  setupHandlers(): Record<string, Function> {
+    return {
+      // Add custom handlers here
+    };
+  }
+
+  async extractData(context: any): Promise<any> {
+    const { page, $ } = context;
+    const selectors = this.config.selectors;
+
+    // Extract data using selectors from config
+    const data = {
+      title: await page?.title() || $('title').text(),
+      // Add more data extraction logic here
+    };
+
+    return data;
+  }
+}`;
+    
+    fs.writeFileSync(
+      path.join(scraperDir, 'index.ts'),
+      scraperTemplate
+    );
+    
+    console.log(`✓ Generated scraper '${name}' in ${scraperDir}`);
+    console.log('Next steps:');
+    console.log(`  1. Edit ${scraperDir}/config.json`);
+    console.log(`  2. Implement data extraction in ${scraperDir}/index.ts`);
+    console.log(`  3. Run: npm run scraper run ${name}`);
+  });
+
+program
+  .command('outputs')
+  .description('List available output adapters')
+  .action(() => {
+    const adapters = OutputAdapterFactory.getAvailableTypes();
+    console.log('Available output adapters:');
+    adapters.forEach(adapter => console.log(`  - ${adapter}`));
   });
 
 program.parse();
 ```
 
-## Example Usage
+## Phase 7: Configuration Files
 
-### 1. Simple Example
-**examples/simple.ts**
-```typescript
-import { createScraper, loadPlugins } from '../src/api';
-
-// Load plugins
-await loadPlugins();
-
-// Create and configure scraper
-const scraper = createScraper('book-scraper')
-  .useCheerio()
-  .extract('cheerio-extractor', {
-    selectors: {
-      title: 'h1',
-      price: { selector: '.price_color', transform: (v) => parseFloat(v.replace('£', '')) },
-      availability: '.availability',
-      rating: { selector: '.star-rating', attribute: 'class' }
-    }
-  })
-  .output('csv-output', {
-    path: './exports/books.csv',
-    headers: true
-  });
-
-// Run scraper
-const result = await scraper.run(['https://books.toscrape.com']);
-
-if (result.isOk()) {
-  console.log('Scraping completed!');
-} else {
-  console.error('Failed:', result.error);
+### Step 18: Create Global Configuration
+Create `configs/global.json`:
+```json
+{
+  "defaultProxy": {
+    "enabled": false,
+    "rotation": "session",
+    "timeout": 30000
+  },
+  "defaultRateLimit": {
+    "requestsPerMinute": 30,
+    "delayBetweenRequests": 2000
+  },
+  "storage": {
+    "baseDir": "./storage",
+    "retention": "30d"
+  },
+  "crawlerType": "playwright",
+  "maxRequestsPerCrawl": 100
 }
 ```
 
-### 2. Configuration-Based Example
-**configs/books.config.ts**
-```typescript
-export default {
-  name: 'books-scraper',
-  crawler: 'cheerio',
-  urls: ['https://books.toscrape.com'],
-  
-  extract: {
-    plugin: 'cheerio-extractor',
-    config: {
-      selectors: {
-        title: 'h1',
-        price: {
-          selector: '.price_color',
-          transform: (value: string) => parseFloat(value.replace(/[£$]/, ''))
-        },
-        availability: '.availability',
-        rating: {
-          selector: '.star-rating',
-          attribute: 'class',
-          transform: (value: string) => {
-            const match = value.match(/star-rating (\w+)/);
-            return match ? match[1] : null;
-          }
+Create `configs/outputs.json`:
+```json
+{
+  "database": {
+    "connections": {
+      "primary": {
+        "type": "postgresql",
+        "host": "localhost",
+        "port": 5432,
+        "database": "scrapers",
+        "user": "scraper_user",
+        "password": "scraper_pass",
+        "pool": {
+          "min": 2,
+          "max": 10
         }
       }
     }
   },
-  
-  transforms: [
-    {
-      plugin: 'add-metadata',
-      config: {
-        fields: {
-          scrapedAt: () => new Date().toISOString(),
-          source: 'books.toscrape.com'
-        }
-      }
+  "csv": {
+    "defaults": {
+      "encoding": "utf8",
+      "delimiter": ",",
+      "headers": true
     }
-  ],
-  
-  outputs: [
+  }
+}
+```
+
+### Step 19: Create Environment Configurations
+Create `configs/environments/dev.json`:
+```json
+{
+  "proxy": {
+    "enabled": false
+  },
+  "rateLimit": {
+    "requestsPerMinute": 60
+  },
+  "maxRequestsPerCrawl": 10
+}
+```
+
+Create `configs/environments/prod.json`:
+```json
+{
+  "proxy": {
+    "enabled": true,
+    "rotation": "request",
+    "countries": ["US", "GB", "DE"]
+  },
+  "rateLimit": {
+    "requestsPerMinute": 10
+  },
+  "maxRequestsPerCrawl": 1000
+}
+```
+
+## Phase 8: Example Scraper
+
+### Step 20: Create Example Scraper
+Create a sample scraper using the generate command:
+```bash
+npm run scraper generate books-to-scrape
+```
+
+Then customize `src/scrapers/books-to-scrape/config.json`:
+```json
+{
+  "extends": "global",
+  "name": "books-to-scrape",
+  "baseUrl": "https://books.toscrape.com",
+  "selectors": {
+    "title": "h1",
+    "price": ".price_color",
+    "rating": ".star-rating",
+    "availability": ".availability",
+    "description": "#product_description + p"
+  },
+  "pagination": {
+    "nextButtonSelector": ".next a",
+    "maxPages": 5
+  },
+  "outputs": [
     {
-      plugin: 'csv-output',
-      config: {
-        path: './exports/books.csv',
-        headers: true
+      "type": "csv",
+      "enabled": true,
+      "config": {
+        "filename": "books-{date}.csv",
+        "path": "./exports",
+        "headers": true
       }
     },
     {
-      plugin: 'console-output',
-      config: {
-        pretty: true
+      "type": "database",
+      "enabled": false,
+      "config": {
+        "table": "books",
+        "connection": "primary",
+        "upsert": true,
+        "batchSize": 50
       }
     }
-  ]
-};
-```
-
-### 3. Custom Plugin Example
-**src/plugins/transforms/add-metadata.ts**
-```typescript
-import { Plugin, PluginMetadata } from '@core/plugin';
-import { Context } from '@core/context';
-import { Result, ok } from 'neverthrow';
-import { z } from 'zod';
-import { ScrapedData } from '@core/types';
-
-const ConfigSchema = z.object({
-  fields: z.record(z.union([z.string(), z.function()]))
-});
-
-export class AddMetadataPlugin implements Plugin {
-  metadata: PluginMetadata = {
-    name: 'add-metadata',
-    version: '1.0.0',
-    type: 'transform',
-    description: 'Adds metadata fields to scraped data',
-    configSchema: ConfigSchema
-  };
-  
-  constructor(private config: z.infer<typeof ConfigSchema>) {}
-  
-  async execute(input: ScrapedData, context: Context): Promise<Result<ScrapedData, Error>> {
-    const metadata: Record<string, any> = {};
-    
-    for (const [key, value] of Object.entries(this.config.fields)) {
-      metadata[key] = typeof value === 'function' ? value() : value;
-    }
-    
-    return ok({
-      ...input,
-      data: {
-        ...input.data,
-        ...metadata
-      }
-    });
+  ],
+  "pipeline": {
+    "processors": ["validation"],
+    "errorHandling": "continue",
+    "batchSize": 25
   }
 }
-
-export default {
-  metadata: AddMetadataPlugin.prototype.metadata,
-  create: (config: z.infer<typeof ConfigSchema>) => new AddMetadataPlugin(config)
-};
 ```
 
-## Testing
+## Phase 9: Testing and Documentation
 
-### 1. Plugin Unit Test
-**tests/unit/plugins/cheerio-extractor.test.ts**
-```typescript
-import { CheerioExtractorPlugin } from '@plugins/extractors/cheerio-extractor';
-import { Context } from '@core/context';
-import winston from 'winston';
+### Step 21: Create Tests
+Create basic test structure and example tests for core components.
 
-describe('CheerioExtractorPlugin', () => {
-  let plugin: CheerioExtractorPlugin;
-  let context: Context;
-  
-  beforeEach(() => {
-    const logger = winston.createLogger({ silent: true });
-    context = new Context(logger);
-    context.set('url', 'https://example.com');
-    
-    plugin = new CheerioExtractorPlugin({
-      selectors: {
-        title: 'h1',
-        price: {
-          selector: '.price',
-          transform: (v) => parseFloat(v.replace('£', ''))
-        }
-      }
-    });
-  });
-  
-  it('should extract data correctly', async () => {
-    const mockCheerio = {
-      $: jest.fn((selector) => ({
-        text: () => selector === 'h1' ? 'Test Book' : '£10.99',
-        length: 1,
-        attr: jest.fn()
-      }))
-    };
-    
-    const result = await plugin.execute(mockCheerio, context);
-    
-    expect(result.isOk()).toBe(true);
-    if (result.isOk()) {
-      expect(result.value.data).toMatchObject({
-        title: 'Test Book',
-        price: 10.99
-      });
-    }
-  });
-});
+### Step 22: Create Documentation
+Create README.md with:
+- Installation instructions
+- Configuration guide
+- Usage examples
+- API documentation
+- Contributing guidelines
+
+## Phase 10: Final Setup
+
+### Step 23: Environment Variables
+Create `.env.example`:
+```
+NODE_ENV=development
+LOG_LEVEL=info
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=scrapers
+DB_USER=scraper_user
+DB_PASSWORD=scraper_pass
 ```
 
-### 2. Integration Test
-**tests/integration/scraper.test.ts**
-```typescript
-import { createScraper, loadPlugins } from '@api/index';
-import * as fs from 'fs/promises';
-
-describe('Scraper Integration', () => {
-  beforeAll(async () => {
-    await loadPlugins();
-  });
-  
-  afterAll(async () => {
-    // Clean up test outputs
-    await fs.rm('./test-exports', { recursive: true, force: true });
-  });
-  
-  it('should scrape and save to CSV', async () => {
-    const scraper = createScraper('test')
-      .useCheerio()
-      .extract('cheerio-extractor', {
-        selectors: {
-          title: 'h1',
-          price: '.price_color'
-        }
-      })
-      .output('csv-output', {
-        path: './test-exports/books.csv',
-        headers: true
-      });
-    
-    const result = await scraper.run(['https://books.toscrape.com/catalogue/page-1.html']);
-    
-    expect(result.isOk()).toBe(true);
-    
-    // Verify CSV file exists
-    const stats = await fs.stat('./test-exports/books.csv');
-    expect(stats.isFile()).toBe(true);
-  });
-});
+### Step 24: Git Configuration
+Create `.gitignore`:
+```
+node_modules/
+dist/
+.env
+logs/
+exports/
+storage/
+*.log
 ```
 
-## Best Practices
-
-### 1. Plugin Development
-- Keep plugins focused on a single responsibility
-- Use Zod schemas for configuration validation
-- Return Result types for error handling
-- Log using the provided context logger
-- Clean up resources in the cleanup method
-
-### 2. Error Handling
-- Always use Result types instead of throwing
-- Provide meaningful error messages
-- Include context in errors
-- Let errors bubble up through the pipeline
-
-### 3. Performance
-- Use streaming for large datasets
-- Implement batching in output plugins
-- Reuse resources across plugin executions
-- Monitor memory usage
-
-### 4. Testing
-- Unit test each plugin independently
-- Mock external dependencies
-- Test error scenarios
-- Use integration tests for full pipelines
-
-## Production Deployment
-
-### 1. Docker Setup
-**Dockerfile**
-```dockerfile
-FROM node:18-alpine AS builder
-WORKDIR /app
-
+### Step 25: Build and Test
+```bash
 # Install dependencies
-COPY package*.json ./
-RUN npm ci
+npm install
 
-# Build TypeScript
-COPY . .
-RUN npm run build
+# Build the project
+npm run build
 
-# Production image
-FROM node:18-alpine
-WORKDIR /app
+# Generate example scraper
+npm run scraper generate example-site
 
-# Install production dependencies
-COPY package*.json ./
-RUN npm ci --production
+# Run the example scraper
+npm run scraper run example-site --urls "https://example.com"
 
-# Copy built files and configs
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/configs ./configs
+# List available scrapers
+npm run scraper list
 
-# Create directories
-RUN mkdir -p exports logs
-
-# Non-root user
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001
-USER nodejs
-
-CMD ["node", "dist/cli/index.js"]
+# Validate configuration
+npm run scraper validate example-site
 ```
 
-### 2. Docker Compose
-**docker-compose.yml**
-```yaml
-version: '3.8'
+## Summary
 
-services:
-  scraper:
-    build: .
-    environment:
-      - NODE_ENV=production
-      - LOG_LEVEL=info
-    volumes:
-      - ./configs:/app/configs:ro
-      - ./exports:/app/exports
-      - ./logs:/app/logs
-    restart: unless-stopped
-    command: node dist/cli/index.js run /app/configs/production.config.js
+This creates a complete, industrial-scale web scraping system with:
 
-  postgres:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_DB: scrapers
-      POSTGRES_USER: scraper_user
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+1. **Maintainable Architecture**: Clean separation of concerns with modular design
+2. **Configuration-Driven**: All scraping logic controlled via JSON configuration
+3. **Pluggable Outputs**: Easy to add new output destinations (CSV, Database, APIs, etc.)
+4. **Industrial Features**: Proxy support, rate limiting, error handling, logging
+5. **CLI Management**: Easy operation and monitoring via command line
+6. **Schema Separation**: Complete separation of selectors from code
+7. **Scalable Design**: Can handle multiple scrapers and large-scale operations
+8. **LLM-Friendly**: Well-documented, consistent patterns for easy understanding
 
-volumes:
-  postgres_data:
-```
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Plugin Not Found**
-   - Ensure plugin is in the correct directory
-   - Check plugin exports default factory
-   - Verify plugin name matches
-
-2. **Memory Issues**
-   - Reduce batch size in output plugins
-   - Implement streaming in plugins
-   - Use pipeline transforms to filter data
-
-3. **Type Errors**
-   - Validate plugin configs with Zod
-   - Check Result type handling
-   - Ensure proper TypeScript configuration
-
-4. **Pipeline Failures**
-   - Check each plugin's error messages
-   - Use context logger for debugging
-   - Test plugins individually
-
-## Architecture Benefits
-
-1. **Modularity**: Each plugin is independent and reusable
-2. **Type Safety**: Full TypeScript support with Zod validation
-3. **Testability**: Plugins can be tested in isolation
-4. **Extensibility**: Easy to add new functionality via plugins
-5. **Composition**: Build complex scrapers from simple pieces
-6. **Error Handling**: Consistent Result pattern throughout
-
-## Migration Guide
-
-From inheritance-based to plugin-based:
-
-1. **Replace Base Classes**: Convert scrapers to extractor plugins
-2. **Convert Output Adapters**: Rewrite as output plugins
-3. **Update Configuration**: Use TypeScript configs instead of JSON
-4. **Refactor Error Handling**: Use Result types everywhere
-5. **Adopt Pipeline Pattern**: Chain plugins instead of method calls
+The system is designed for maximum maintainability and allows adding new scrapers by simply creating configuration files and minimal implementation code.
