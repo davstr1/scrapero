@@ -1,0 +1,29 @@
+{
+  "name": "wordpress-plugins-svn-scraper",
+  "version": "1.0.0",
+  "description": "WordPress plugin scraper using SVN data as slug source",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "download": "node index.js download-svn",
+    "extract": "node index.js extract-slugs",
+    "scrape": "node index.js scrape",
+    "full": "node index.js full"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "cheerio": "^1.0.0-rc.12",
+    "commander": "^11.1.0",
+    "csv-parser": "^3.0.0",
+    "csv-writer": "^1.6.0",
+    "https-proxy-agent": "^7.0.2",
+    "node-html-parser": "^6.1.11",
+    "p-limit": "^3.1.0",
+    "progress": "^2.0.3"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "author": "",
+  "license": "ISC"
+}
