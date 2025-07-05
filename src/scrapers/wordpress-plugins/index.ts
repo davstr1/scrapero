@@ -25,11 +25,39 @@ export default class WordpressPluginsScraper extends BaseScraper {
       await page.waitForLoadState('networkidle');
     }
     
-    // Wait for plugin cards to load
-    await page.waitForSelector('article.plugin-card', { timeout: 30000 });
+    // Wait for page to stabilize and debug
+    await page.waitForTimeout(3000);
     
-    // Extract plugin data using proper selectors from config
-    const plugins = await page.$$eval('article.plugin-card', (cards) => {
+    // Debug: Log the page URL and content
+    console.log('Current URL:', page.url());
+    
+    // Try multiple possible selectors
+    const selectors = [
+      'article.plugin-card',
+      '.plugin-card',
+      'article.type-plugin',
+      '.plugin-section'
+    ];
+    
+    let foundSelector = null;
+    for (const selector of selectors) {
+      const count = await page.$$eval(selector, els => els.length);
+      if (count > 0) {
+        console.log(`Found ${count} elements with selector: ${selector}`);
+        foundSelector = selector;
+        break;
+      }
+    }
+    
+    if (!foundSelector) {
+      console.log('No plugin cards found. Page HTML preview:');
+      const bodyText = await page.$eval('body', el => el.innerText.slice(0, 500));
+      console.log(bodyText);
+      throw new Error('No plugin cards found on page');
+    }
+    
+    // Extract plugin data using the found selector
+    const plugins = await page.$$eval(foundSelector, (cards) => {
       const pluginData: any[] = [];
       
       cards.forEach((card) => {
