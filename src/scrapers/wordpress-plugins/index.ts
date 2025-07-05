@@ -72,16 +72,9 @@ export default class WordpressPluginsScraper extends BaseScraper {
           // Skip if no name or URL
           if (!name || !url) return;
           
-          // Extract author - try multiple selectors
-          let author = '';
-          const authorSelectors = ['.author a', '.byline a', '.plugin-author a'];
-          for (const selector of authorSelectors) {
-            const authorElement = card.querySelector(selector);
-            if (authorElement?.textContent) {
-              author = authorElement.textContent.trim();
-              break;
-            }
-          }
+          // Extract author - the text is in a span inside .plugin-author
+          const authorElement = card.querySelector('.plugin-author span');
+          const author = authorElement?.textContent?.trim() || '';
           
           // Extract description
           const descElement = card.querySelector('.entry-excerpt');
@@ -92,10 +85,11 @@ export default class WordpressPluginsScraper extends BaseScraper {
           const ratingAttr = ratingElement?.getAttribute('data-rating');
           const rating = ratingAttr ? parseFloat(ratingAttr) : 0;
           
-          // Extract rating count
-          const ratingCountElement = card.querySelector('.rating-count a');
+          // Extract rating count - it's directly in .rating-count
+          const ratingCountElement = card.querySelector('.rating-count');
           const ratingCountText = ratingCountElement?.textContent || '0';
-          const ratingCountMatch = ratingCountText.match(/\(([0-9,]+)\)/);
+          // Extract number from text like "(7,067 total ratings)"
+          const ratingCountMatch = ratingCountText.match(/\(([0-9,]+)/); // Note: removed closing paren from regex
           const ratingCount = ratingCountMatch ? parseInt(ratingCountMatch[1].replace(/,/g, '')) : 0;
           
           // Extract active installations
