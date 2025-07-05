@@ -1,6 +1,8 @@
 import { BaseScraper } from '../base/BaseScraper';
 
 export default class WordpressPluginsScraper extends BaseScraper {
+  private processedCount = 0;
+
   constructor() {
     super('./src/scrapers/wordpress-plugins/config.json');
   }
@@ -12,6 +14,17 @@ export default class WordpressPluginsScraper extends BaseScraper {
   }
 
   async extractData(context: any): Promise<any> {
+    const { page, request } = context;
+    
+    // Check if this is a detail page request
+    if (context.request.userData?.isDetailPage) {
+      return this.extractDetailPageData(context);
+    } else {
+      return this.extractListingPageData(context);
+    }
+  }
+
+  private async extractListingPageData(context: any): Promise<any> {
     const { page, request } = context;
     
     // Wait for page to load
@@ -161,6 +174,19 @@ export default class WordpressPluginsScraper extends BaseScraper {
 
     console.log(`Extracted ${plugins.length} plugins from current page`);
     
+    // Enqueue detail pages for each plugin
+    for (const plugin of plugins) {
+      const slug = plugin.url.split('/').filter(Boolean).pop();
+      await context.enqueueRequest({
+        url: plugin.url,
+        userData: {
+          isDetailPage: true,
+          pluginSlug: slug,
+          listingData: plugin
+        }
+      });
+    }
+    
     // Handle pagination
     const hasNextPage = await page.$('.pagination-links a.next:not(.disabled)');
     if (hasNextPage && context.request.userData?.pageNumber < 2) {
@@ -174,5 +200,183 @@ export default class WordpressPluginsScraper extends BaseScraper {
     }
 
     return plugins;
+  }
+
+  private async extractDetailPageData(context: any): Promise<any> {
+    this.processedCount++;
+    const timestamp = new Date().toISOString();
+    const memory = process.memoryUsage().heapUsed / 1024 / 1024;
+    
+    console.log(`[${timestamp}] Processing detail page ${this.processedCount}: ${context.request.userData.pluginSlug} (Memory: ${memory.toFixed(2)}MB)`);
+    
+    const { page, request } = context;
+    const { listingData } = request.userData;
+    
+    try {
+      // Wait for page to load
+      await page.waitForLoadState('networkidle');
+      
+      // Extract all detail fields
+      const version = await this.extractVersion(page);
+      const lastUpdated = await this.extractLastUpdated(page);
+      const lastUpdatedDays = this.calculateDaysSinceUpdate(lastUpdated);
+      const downloadUrl = await this.extractDownloadUrl(page);
+      const requiresWP = await this.extractWPVersion(page);
+      const requiresPHP = await this.extractPHPVersion(page);
+      const supportStats = await this.extractSupportStats(page);
+      const tags = await this.extractTags(page);
+      const contributors = await this.extractContributors(page);
+      const homepage = await this.extractHomepage(page);
+      
+      // Merge with listing data
+      const detailData = {
+        version,
+        lastUpdated,
+        lastUpdatedDays,
+        downloadUrl,
+        requiresWP,
+        requiresPHP,
+        supportThreadsTotal: supportStats.totalThreads || 0,
+        supportThreadsResolved: supportStats.resolvedThreads || 0,
+        tags,
+        contributors,
+        homepage
+      };
+      
+      return { ...listingData, ...detailData };
+    } catch (error) {
+      console.error('Failed to extract detail data:', error);
+      return listingData;
+    }
+  }
+
+  private async extractVersion(page: any): Promise<string> {
+    try {
+      const versionText = await page.$$eval('.widget.plugin-meta li', (els: any[]) => {
+        const versionLi = els.find(el => el.textContent?.includes('Version'));
+        return versionLi?.textContent || '';
+      });
+      return versionText.replace('Version', '').trim();
+    } catch (error) {
+      return '';
+    }
+  }
+
+  private async extractLastUpdated(page: any): Promise<string> {
+    try {
+      const updatedText = await page.$$eval('.widget.plugin-meta li', (els: any[]) => {
+        const updatedLi = els.find(el => el.textContent?.includes('Last updated'));
+        return updatedLi?.textContent || '';
+      });
+      return updatedText.replace('Last updated', '').trim();
+    } catch (error) {
+      return '';
+    }
+  }
+
+  private calculateDaysSinceUpdate(lastUpdatedText: string): number {
+    const match = lastUpdatedText.match(/(\d+)\s+days?\s+ago/);
+    if (match) return parseInt(match[1]);
+    
+    const weeksMatch = lastUpdatedText.match(/(\d+)\s+weeks?\s+ago/);
+    if (weeksMatch) return parseInt(weeksMatch[1]) * 7;
+    
+    return 0;
+  }
+
+  private async extractDownloadUrl(page: any): Promise<string> {
+    try {
+      const downloadLink = await page.$eval('.plugin-download a.button', (el: any) => el.getAttribute('href'));
+      return downloadLink || '';
+    } catch (error) {
+      return '';
+    }
+  }
+
+  private async extractWPVersion(page: any): Promise<string> {
+    try {
+      const wpText = await page.$$eval('.widget.plugin-meta li', (els: any[]) => {
+        const wpLi = els.find(el => el.textContent?.includes('Requires WordPress Version'));
+        return wpLi?.textContent || '';
+      });
+      const match = wpText.match(/[\d.]+/);
+      return match ? match[0] : '';
+    } catch (error) {
+      return '';
+    }
+  }
+
+  private async extractPHPVersion(page: any): Promise<string> {
+    try {
+      const phpText = await page.$$eval('.widget.plugin-meta li', (els: any[]) => {
+        const phpLi = els.find(el => el.textContent?.includes('Requires PHP Version'));
+        return phpLi?.textContent || '';
+      });
+      const match = phpText.match(/[\d.]+/);
+      return match ? match[0] : '';
+    } catch (error) {
+      return '';
+    }
+  }
+
+  private async extractSupportStats(page: any): Promise<any> {
+    try {
+      const stats = await page.$$eval('.widget ul li', (els: any[]) => {
+        const result: any = {};
+        els.forEach(el => {
+          const text = el.textContent || '';
+          if (text.includes('Support threads')) {
+            const match = text.match(/(\d+)/);
+            result.totalThreads = match ? parseInt(match[1]) : 0;
+          }
+          if (text.includes('resolved in the last')) {
+            const match = text.match(/(\d+)/);
+            result.resolvedThreads = match ? parseInt(match[1]) : 0;
+          }
+        });
+        return result;
+      });
+      return stats;
+    } catch (error) {
+      return { totalThreads: 0, resolvedThreads: 0 };
+    }
+  }
+
+  private async extractTags(page: any): Promise<string> {
+    try {
+      const tags = await page.$$eval('.widget.entry-meta .tags a', (els: any[]) => 
+        els.map(el => el.textContent?.trim())
+      );
+      return tags.filter(Boolean).join(', ');
+    } catch (error) {
+      return '';
+    }
+  }
+
+  private async extractContributors(page: any): Promise<string> {
+    try {
+      const contributors = await page.$$eval('.widget h3', async (headers: any[]) => {
+        const contribHeader = headers.find(h => h.textContent?.includes('Contributors'));
+        if (!contribHeader) return [];
+        const list = contribHeader.nextElementSibling;
+        if (!list) return [];
+        return Array.from(list.querySelectorAll('a')).map((a: any) => a.textContent?.trim());
+      });
+      return contributors.filter(Boolean).join(', ');
+    } catch (error) {
+      return '';
+    }
+  }
+
+  private async extractHomepage(page: any): Promise<string> {
+    try {
+      const homepage = await page.$$eval('.widget a', (links: any[]) => {
+        const homepageLink = links.find(link => link.textContent?.includes('Plugin Homepage'));
+        return homepageLink?.getAttribute('href') || '';
+      });
+      return homepage;
+    } catch (error) {
+      return '';
+    }
   }
 }

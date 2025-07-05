@@ -21,7 +21,8 @@
     "nextButtonSelector": ".pagination-links a.next",
     "maxPages": 2
   },
-  "maxRequestsPerCrawl": 2,
+  "maxRequestsPerCrawl": 5,
+  "maxConcurrency": 2,
   "outputs": [
     {
       "type": "csv",
@@ -43,7 +44,7 @@
     "rotation": "session"
   },
   "rateLimit": {
-    "requestsPerMinute": 20,
-    "delayBetweenRequests": 3000
+    "requestsPerMinute": 10,
+    "delayBetweenRequests": 6000
   }
 }
