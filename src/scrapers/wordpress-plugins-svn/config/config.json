@@ -31,7 +31,7 @@
   "selectors": {
     "pluginName": [".wp-block-post-title", ".entry-title"],
     "author": "header .By",
-    "shortDescription": ".entry-content > p:first-of-type",
+    "shortDescription": [".entry-excerpt", ".plugin-description", "header p", ".entry-content > p:first-of-type"],
     "rating": ".wporg-ratings",
     "ratingCount": ".wporg-ratings-stars__label",
     "ratingBreakdown": {

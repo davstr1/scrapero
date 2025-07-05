@@ -281,15 +281,51 @@ class PluginScraper {
   }
 
   extractMetaField($, fieldName) {
-    const metaText = $('.plugin-meta').text();
-    const regex = new RegExp(`${fieldName}[:\s]+([^\\n]+?)(?:\\n|$)`, 'i');
-    const match = metaText.match(regex);
-    return match ? match[1].trim() : '';
+    // Try to find in the meta section list items
+    const metaItems = $('section').last().find('li');
+    let result = '';
+    
+    metaItems.each((i, el) => {
+      const text = $(el).text();
+      if (text.toLowerCase().includes(fieldName.toLowerCase())) {
+        // Extract the value after the field name
+        const parts = text.split(/\s+/);
+        const fieldIndex = parts.findIndex(p => p.toLowerCase().includes(fieldName.toLowerCase()));
+        if (fieldIndex !== -1 && fieldIndex < parts.length - 1) {
+          result = parts.slice(fieldIndex + 1).join(' ').trim();
+          return false; // break the loop
+        }
+      }
+    });
+    
+    // Fallback to searching in the full text
+    if (!result) {
+      const bodyText = $('body').text();
+      const regex = new RegExp(`${fieldName}[:\\s]+([^\\n]+?)(?:\\n|$)`, 'i');
+      const match = bodyText.match(regex);
+      result = match ? match[1].trim() : '';
+    }
+    
+    return result;
   }
 
   extractIconUrl($) {
-    const iconImg = $('.plugin-icon img').first();
-    return iconImg.attr('src') || '';
+    // Try multiple selectors
+    const selectors = [
+      '.plugin-icon',
+      'img.plugin-icon',
+      '.entry-thumbnail img',
+      'header img'
+    ];
+    
+    for (const selector of selectors) {
+      const img = $(selector).first();
+      if (img.length) {
+        return img.attr('src') || '';
+      }
+    }
+    
+    return '';
   }
 
   determineBusinessModel($) {
@@ -307,8 +343,23 @@ class PluginScraper {
   }
 
   calculateLastUpdatedDays($) {
-    const lastUpdated = this.extractMetaField($, 'Last updated');
-    const match = lastUpdated.match(/(\d+)\s+(day|week|month|year)s?\s+ago/i);
+    // Try to find last updated in meta section
+    const metaItems = $('section').last().find('li');
+    let lastUpdatedText = '';
+    
+    metaItems.each((i, el) => {
+      const text = $(el).text();
+      if (text.toLowerCase().includes('last updated')) {
+        lastUpdatedText = text;
+        return false;
+      }
+    });
+    
+    if (!lastUpdatedText) {
+      lastUpdatedText = this.extractMetaField($, 'Last updated');
+    }
+    
+    const match = lastUpdatedText.match(/(\d+)\s+(day|week|month|year)s?\s+ago/i);
     
     if (match) {
       const value = parseInt(match[1]);
