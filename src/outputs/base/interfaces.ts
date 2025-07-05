@@ -20,6 +20,8 @@ export interface PipelineResult {
 export interface ScraperConfig {
   name: string;
   baseUrl: string;
+  crawlerType?: 'playwright' | 'cheerio';
+  maxRequestsPerCrawl?: number;
   selectors: Record<string, string>;
   pagination?: {
     nextButtonSelector: string;
