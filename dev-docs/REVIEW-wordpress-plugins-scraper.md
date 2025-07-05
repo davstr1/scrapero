@@ -29,14 +29,14 @@ article.plugin-card
 
 /* Plugin details */
 h3.entry-title a              /* Plugin name and link */
-.plugin-author                /* Author info */
-.plugin-desc                  /* Description */
-.star-rating                  /* Rating stars */
-.rating-count                 /* Number of ratings */
-.active-installs              /* Installation count */
+.plugin-author span           /* Author info (text inside span) */
+.entry-excerpt                /* Description */
+.wporg-ratings                /* Rating container (has data-rating attribute) */
+.rating-count                 /* Number of ratings (e.g., "(1,234 total ratings)") */
+.active-installs span         /* Installation count (text inside span) */
 .plugin-last-updated          /* Last update date */
-.tested-up-to                 /* WordPress version compatibility */
-.plugin-icon img              /* Plugin icon */
+.tested-with span             /* WordPress version (text inside span) */
+.plugin-icon                  /* Plugin icon image */
 
 /* Pagination */
 .pagination-links a.next      /* Next page link */
@@ -63,14 +63,14 @@ Create/update `src/scrapers/wordpress-plugins/config.json`:
     "pluginCard": "article.plugin-card",
     "pluginName": "h3.entry-title a",
     "pluginUrl": "h3.entry-title a",
-    "author": ".plugin-author",
-    "description": ".plugin-desc",
-    "rating": ".star-rating",
+    "author": ".plugin-author span",
+    "description": ".entry-excerpt",
+    "rating": ".wporg-ratings",
     "ratingCount": ".rating-count",
-    "activeInstalls": ".active-installs",
+    "activeInstalls": ".active-installs span",
     "lastUpdated": ".plugin-last-updated",
-    "testedUpTo": ".tested-up-to",
-    "pluginIcon": ".plugin-icon img"
+    "testedUpTo": ".tested-with span",
+    "pluginIcon": ".plugin-icon"
   },
   "pagination": {
     "nextButtonSelector": ".pagination-links a.next",
@@ -143,14 +143,9 @@ export default class WordpressPluginsScraper extends BaseScraper {
           return element?.getAttribute(attr) || '';
         };
 
-        // Extract rating value
+        // Extract rating value from data-rating attribute
         const ratingElement = card.querySelector(sel.rating);
-        let ratingValue = 0;
-        if (ratingElement) {
-          const ratingClass = ratingElement.getAttribute('class') || '';
-          const match = ratingClass.match(/rating-(\d+)/);
-          ratingValue = match ? parseInt(match[1]) / 20 : 0; // Convert to 0-5 scale
-        }
+        const ratingValue = ratingElement ? parseFloat(ratingElement.getAttribute('data-rating') || '0') : 0;
 
         // Parse active installations
         const installsText = getTextContent(sel.activeInstalls);
