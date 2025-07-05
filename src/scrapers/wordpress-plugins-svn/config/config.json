@@ -1,0 +1,95 @@
+{
+  "scraper": {
+    "name": "WordPress Plugins SVN Scraper",
+    "version": "1.0.0",
+    "description": "Scrapes all WordPress plugins using SVN data as slug source"
+  },
+  "svn": {
+    "url": "https://plugins.svn.wordpress.org/",
+    "timeout": 3600000,
+    "chunkSize": 1048576,
+    "retries": 5,
+    "retryDelay": 5000
+  },
+  "proxy": {
+    "enabled": true,
+    "url": "http://sxbrfiav:z1rnitsp7b1x@82.25.216.29:6871/",
+    "rotateOnError": true
+  },
+  "scraping": {
+    "baseUrl": "https://wordpress.org/plugins/",
+    "concurrency": 10,
+    "requestTimeout": 30000,
+    "retries": 3,
+    "retryDelay": 2000,
+    "progressInterval": 100,
+    "rateLimit": {
+      "maxRequests": 50,
+      "perSeconds": 10
+    }
+  },
+  "selectors": {
+    "pluginName": [".wp-block-post-title", ".entry-title"],
+    "author": "header .By",
+    "shortDescription": ".entry-content > p:first-of-type",
+    "rating": ".wporg-ratings",
+    "ratingCount": ".wporg-ratings-stars__label",
+    "ratingBreakdown": {
+      "5star": ".wporg-ratings-bars__bar:nth-child(1) .wporg-ratings-bars__bar-count",
+      "4star": ".wporg-ratings-bars__bar:nth-child(2) .wporg-ratings-bars__bar-count",
+      "3star": ".wporg-ratings-bars__bar:nth-child(3) .wporg-ratings-bars__bar-count",
+      "2star": ".wporg-ratings-bars__bar:nth-child(4) .wporg-ratings-bars__bar-count",
+      "1star": ".wporg-ratings-bars__bar:nth-child(5) .wporg-ratings-bars__bar-count"
+    },
+    "activeInstalls": ".plugin-meta",
+    "lastUpdated": ".plugin-meta",
+    "version": ".plugin-meta",
+    "testedUpTo": ".plugin-meta",
+    "requiresWP": ".plugin-meta",
+    "requiresPHP": ".plugin-meta",
+    "downloadUrl": ".wp-block-button__link",
+    "iconUrl": ".plugin-icon img",
+    "tags": ".wp-block-post-tags a",
+    "homepage": ".plugin-homepage",
+    "supportThreads": ".support-threads",
+    "extendedDescription": ".entry-content"
+  },
+  "csv": {
+    "headers": [
+      "name",
+      "url", 
+      "author",
+      "description",
+      "rating",
+      "ratingCount",
+      "rating5Star",
+      "rating4Star",
+      "rating3Star",
+      "rating2Star",
+      "rating1Star",
+      "activeInstalls",
+      "lastUpdated",
+      "testedUpTo",
+      "iconUrl",
+      "businessModel",
+      "scrapedAt",
+      "version",
+      "lastUpdatedDays",
+      "downloadUrl",
+      "requiresWP",
+      "requiresPHP",
+      "supportThreadsTotal",
+      "supportThreadsResolved",
+      "tags",
+      "contributors",
+      "homepage",
+      "extendedDescription"
+    ]
+  },
+  "output": {
+    "dateFormat": "YYYY-MM-DD",
+    "timestampFormat": "YYYY-MM-DDTHH:mm:ss.SSSZ",
+    "encoding": "utf8",
+    "delimiter": ","
+  }
+}
