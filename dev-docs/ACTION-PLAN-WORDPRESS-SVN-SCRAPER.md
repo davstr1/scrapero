@@ -47,17 +47,23 @@ Based on analysis of multiple plugin pages, here are the exact fields to extract
 3. **Short Description**: First paragraph after title
 4. **Rating Value**: Extract from rating display (e.g., "4.5 out of 5 stars")
 5. **Rating Count**: Number inside `.wporg-ratings-stars__label` 
-6. **Active Installs**: Text containing "million" or specific number
-7. **Last Updated**: Text after "Last updated" (e.g., "4 days ago")
-8. **Version**: Current plugin version number
-9. **Tested Up To**: WordPress version after "Tested up to"
-10. **Requires WordPress**: Version after "WordPress version"
-11. **Requires PHP**: Version after "PHP version"
-12. **Download URL**: Link in download button or from page data
-13. **Icon URL**: Plugin icon image source
+6. **Rating Breakdown**: Individual star counts
+   - **5-star count**: `.wporg-ratings-bars__bar:nth-child(1) .wporg-ratings-bars__bar-count`
+   - **4-star count**: `.wporg-ratings-bars__bar:nth-child(2) .wporg-ratings-bars__bar-count`
+   - **3-star count**: `.wporg-ratings-bars__bar:nth-child(3) .wporg-ratings-bars__bar-count`
+   - **2-star count**: `.wporg-ratings-bars__bar:nth-child(4) .wporg-ratings-bars__bar-count`
+   - **1-star count**: `.wporg-ratings-bars__bar:nth-child(5) .wporg-ratings-bars__bar-count`
+7. **Active Installs**: Text containing "million" or specific number
+8. **Last Updated**: Text after "Last updated" (e.g., "4 days ago")
+9. **Version**: Current plugin version number
+10. **Tested Up To**: WordPress version after "Tested up to"
+11. **Requires WordPress**: Version after "WordPress version"
+12. **Requires PHP**: Version after "PHP version"
+13. **Download URL**: Link in download button or from page data
+14. **Icon URL**: Plugin icon image source
 
 **Secondary Fields (From extended content):**
-14. **Tags**: Plugin tags/categories if available (save the slugs)
+15. **Tags**: Plugin tags/categories if available (save the slugs)
 16. **Homepage**: Plugin's external homepage URL
 17. **Support Threads**: Total and resolved count
 18. **Extended Description**: Full plugin description text
