@@ -37,6 +37,37 @@ Building a NEW WordPress plugin scraper that uses SVN data as the source for plu
 - [ ] Define new CSV schema in `config/csv-schema.json`
 - [ ] Create selector mapping configuration
 
+#### Exact Field Structure and Selectors from WordPress Plugin Pages
+
+Based on analysis of multiple plugin pages, here are the exact fields to extract:
+
+**Primary Fields (Available in page content):**
+1. **Plugin Name**: `.wp-block-post-title` or `.entry-title`
+2. **Author**: Text following "By" in the header area
+3. **Short Description**: First paragraph after title
+4. **Rating Value**: Extract from rating display (e.g., "4.5 out of 5 stars")
+5. **Rating Count**: Number inside `.wporg-ratings-stars__label` 
+6. **Active Installs**: Text containing "million" or specific number
+7. **Last Updated**: Text after "Last updated" (e.g., "4 days ago")
+8. **Version**: Current plugin version number
+9. **Tested Up To**: WordPress version after "Tested up to"
+10. **Requires WordPress**: Version after "WordPress version"
+11. **Requires PHP**: Version after "PHP version"
+12. **Download URL**: Link in download button or from page data
+13. **Icon URL**: Plugin icon image source
+
+**Secondary Fields (From extended content):**
+14. **Tags**: Plugin tags/categories if available (save the slugs)
+16. **Homepage**: Plugin's external homepage URL
+17. **Support Threads**: Total and resolved count
+18. **Extended Description**: Full plugin description text
+
+**Data Extraction Strategy:**
+- Primary method: Parse HTML content and extract text patterns
+- Fallback method: Use JSON-LD structured data if available
+- Meta section parsing: Extract from "Version", "Last updated", etc. labels
+- Rating calculation: Convert star display to numeric value
+
 ### Phase 5: Scraper Core Implementation
 - [ ] Create `lib/plugin-scraper.js` module
 - [ ] Implement URL builder (slug → plugin page URL)
