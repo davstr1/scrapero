@@ -133,7 +133,7 @@ class PluginScraper {
   }
 
   async scrapePlugin(slugData) {
-    const url = slugData.url;
+    const url = slugData.plugin_url || slugData.url;
     const maxRetries = this.config.scraping.retries;
     
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -152,7 +152,8 @@ class PluginScraper {
         const $ = cheerio.load(response.data);
         
         // Extract data
-        const data = this.extractPluginData($, url, slugData.slug);
+        const slug = slugData.plugin_slug || slugData.slug;
+        const data = this.extractPluginData($, url, slug);
         
         return data;
         
@@ -174,7 +175,7 @@ class PluginScraper {
       name: this.extractText($, this.selectors.pluginName),
       url: url,
       author: this.extractAuthor($),
-      description: this.extractText($, this.selectors.shortDescription),
+      description: this.extractText($, this.selectors.shortDescription).replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim(),
       rating: this.extractRating($),
       ratingCount: this.extractRatingCount($),
       rating5Star: this.extractText($, this.selectors.ratingBreakdown['5star']),
@@ -220,16 +221,27 @@ class PluginScraper {
   }
 
   extractAuthor($) {
-    // Try multiple strategies
-    const authorText = $('header').text();
-    const byMatch = authorText.match(/By\s+(.+?)(?:\s|$)/i);
+    // Try to find author in the byline
+    const bylineText = $('.wp-block-wporg-plugin-byline').text();
+    const byMatch = bylineText.match(/By\s+(.+?)(?:\s|$)/i);
     if (byMatch) {
       return byMatch[1].trim();
     }
     
-    // Fallback to link after "By"
-    const authorLink = $('header a').first().text().trim();
-    return authorLink || '';
+    // Try the contributor section
+    const contributorLink = $('.wp-block-wporg-plugin-contributors a').first().text().trim();
+    if (contributorLink) {
+      return contributorLink;
+    }
+    
+    // Fallback to header
+    const headerText = $('header').text();
+    const headerByMatch = headerText.match(/By\s+(.+?)(?:\s|$)/i);
+    if (headerByMatch) {
+      return headerByMatch[1].trim();
+    }
+    
+    return '';
   }
 
   extractRating($) {
@@ -245,15 +257,24 @@ class PluginScraper {
   }
 
   extractActiveInstalls($) {
-    const metaText = $('.plugin-meta').text();
-    const match = metaText.match(/(\d+(?:,\d+)*\+?)\s*(?:million)?\s*active installations/i);
+    // Try multiple locations
+    const possibleTexts = [
+      $('.plugin-meta').text(),
+      $('.wp-block-wporg-plugin-meta').text(),
+      $('body').text()
+    ];
     
-    if (match) {
-      let count = match[1].replace(/,/g, '').replace('+', '');
-      if (metaText.toLowerCase().includes('million')) {
-        count = parseInt(count) * 1000000;
+    for (const text of possibleTexts) {
+      // Look for patterns like "10+ active installations" or "1 million+ active installations"
+      const match = text.match(/(\d+(?:,\d+)*(?:\.\d+)?)\s*(?:million)?\+?\s*active\s*install/i);
+      
+      if (match) {
+        let count = match[1].replace(/,/g, '');
+        if (text.toLowerCase().includes('million')) {
+          count = parseFloat(count) * 1000000;
+        }
+        return parseInt(count);
       }
-      return parseInt(count);
     }
     
     return 0;
@@ -350,8 +371,12 @@ class PluginScraper {
 
   extractExtendedDescription($) {
     const description = $('.entry-content').first().text().trim();
-    // Limit to first 1000 characters
-    return description.substring(0, 1000);
+    // Clean up newlines and limit to first 1000 characters
+    return description
+      .replace(/\n+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .substring(0, 1000)
+      .trim();
   }
 
   async loadSlugs(inputFile) {
