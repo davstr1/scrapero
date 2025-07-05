@@ -32,30 +32,33 @@ npm install -D eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin
 ### 2. Project Structure
 ```bash
 # Create all directories
-mkdir -p src/scrapers src/outputs src/core src/utils src/cli \
+mkdir -p src/core src/plugins src/runtime src/api src/cli \
   src/types configs tests/unit tests/integration tests/fixtures \
-  storage exports logs docs
+  storage exports logs docs examples
 ```
 
 ```
 src/
-├── core/           # Core functionality
-│   ├── config.ts   # Configuration with Zod schemas
-│   ├── logger.ts   # Structured logging
-│   ├── errors.ts   # Error types and handling
+├── core/           # Core interfaces and types
+│   ├── plugin.ts   # Plugin system interfaces
+│   ├── pipeline.ts # Pipeline composition
+│   ├── context.ts  # Execution context
+│   ├── result.ts   # Result<T,E> type
 │   └── types.ts    # Shared TypeScript types
-├── scrapers/       # Scraper implementations
-│   ├── base.ts     # Base scraper with composition
-│   └── */          # Individual scrapers
-├── outputs/        # Output adapters
-│   ├── base.ts     # Output interface
-│   ├── csv.ts      # CSV writer
-│   ├── database.ts # Database writer
-│   └── s3.ts       # S3 uploader
-├── utils/          # Utilities
-│   ├── retry.ts    # Retry logic
-│   ├── validate.ts # Data validation
-│   └── transform.ts # Data transformations
+├── plugins/        # Plugin implementations
+│   ├── extractors/ # Data extraction plugins
+│   ├── outputs/    # Output format plugins
+│   ├── transforms/ # Data transformation plugins
+│   └── validators/ # Validation plugins
+├── runtime/        # Execution engine
+│   ├── engine.ts   # Main execution engine
+│   ├── loader.ts   # Plugin loader
+│   ├── registry.ts # Plugin registry
+│   └── executor.ts # Pipeline executor
+├── api/            # Public API
+│   ├── index.ts    # Main exports
+│   ├── builder.ts  # Fluent API builder
+│   └── facade.ts   # Simplified interface
 └── cli/            # CLI interface
     └── index.ts    # Command definitions
 ```
