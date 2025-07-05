@@ -175,27 +175,29 @@ export default class WordpressPluginsScraper extends BaseScraper {
     console.log(`Extracted ${plugins.length} plugins from current page`);
     
     // Enqueue detail pages for each plugin
-    for (const plugin of plugins) {
+    const detailRequests = plugins.map(plugin => {
       const slug = plugin.url.split('/').filter(Boolean).pop();
-      await context.enqueueRequest({
+      return {
         url: plugin.url,
         userData: {
           isDetailPage: true,
           pluginSlug: slug,
           listingData: plugin
         }
-      });
-    }
+      };
+    });
+    
+    await context.addRequests(detailRequests);
     
     // Handle pagination
     const hasNextPage = await page.$('.pagination-links a.next:not(.disabled)');
     if (hasNextPage && context.request.userData?.pageNumber < 2) {
       const nextPageUrl = await page.$eval('.pagination-links a.next', (el) => el.getAttribute('href'));
       if (nextPageUrl) {
-        await context.enqueueRequest({
+        await context.addRequests([{
           url: nextPageUrl.startsWith('http') ? nextPageUrl : `https://wordpress.org${nextPageUrl}`,
           userData: { pageNumber: (context.request.userData?.pageNumber || 1) + 1 }
-        });
+        }]);
       }
     }
 
