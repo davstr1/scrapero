@@ -18,8 +18,9 @@ Based on WordPress plugin directory patterns, each plugin card typically contain
 5. **Rating Count**: Number in parentheses after stars
 6. **Active Installations**: Text like "10,000+ active installations"
 7. **Last Updated**: Date text, often with "Updated" prefix
-8. **Plugin URL**: Link to the plugin detail page
-9. **Plugin Icon**: Image with plugin logo
+8. **Tested up to**: WordPress version compatibility (e.g., "6.8.1")
+9. **Plugin URL**: Link to the plugin detail page
+10. **Plugin Icon**: Image with plugin logo
 
 ### Typical Selectors (WordPress.org pattern)
 ```css
@@ -34,6 +35,7 @@ h3.entry-title a              /* Plugin name and link */
 .rating-count                 /* Number of ratings */
 .active-installs              /* Installation count */
 .plugin-last-updated          /* Last update date */
+.tested-up-to                 /* WordPress version compatibility */
 .plugin-icon img              /* Plugin icon */
 
 /* Pagination */
@@ -67,6 +69,7 @@ Create/update `src/scrapers/wordpress-plugins/config.json`:
     "ratingCount": ".rating-count",
     "activeInstalls": ".active-installs",
     "lastUpdated": ".plugin-last-updated",
+    "testedUpTo": ".tested-up-to",
     "pluginIcon": ".plugin-icon img"
   },
   "pagination": {
@@ -159,6 +162,11 @@ export default class WordpressPluginsScraper extends BaseScraper {
         const ratingMatch = ratingText.match(/\((\d+)/);
         const ratingCount = ratingMatch ? ratingMatch[1] : '0';
 
+        // Parse WordPress version compatibility
+        const testedUpToText = getTextContent(sel.testedUpTo);
+        const versionMatch = testedUpToText.match(/(\d+\.\d+(?:\.\d+)?)/);
+        const testedUpTo = versionMatch ? versionMatch[1] : '';
+
         return {
           name: getTextContent(sel.pluginName),
           url: getAttr(sel.pluginUrl, 'href'),
@@ -168,6 +176,7 @@ export default class WordpressPluginsScraper extends BaseScraper {
           ratingCount: parseInt(ratingCount),
           activeInstalls: parseInt(activeInstalls),
           lastUpdated: getTextContent(sel.lastUpdated),
+          testedUpTo: testedUpTo,
           iconUrl: getAttr(sel.pluginIcon, 'src'),
           businessModel: 'commercial',
           scrapedAt: new Date().toISOString()
@@ -234,6 +243,7 @@ The scraper will generate a CSV file with the following columns:
 - ratingCount
 - activeInstalls
 - lastUpdated
+- testedUpTo (WordPress version compatibility)
 - iconUrl
 - businessModel
 - scrapedAt
