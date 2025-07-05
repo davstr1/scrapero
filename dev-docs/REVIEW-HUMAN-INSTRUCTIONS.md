@@ -2,6 +2,9 @@
 
 ## Quick MVP Assessment
 
+### Important: This is a NEW Implementation
+**This should be implemented as a separate, parallel scraper alongside the existing WordPress plugin scraper. Do NOT overwrite or replace the current implementation. This is not a v2 - it's a different approach for a different use case.**
+
 ### Current State
 The document outlines a new WordPress plugin scraping approach that differs from the current implementation. It proposes a two-phase process:
 1. Download large SVN file and extract plugin slugs to CSV
@@ -9,6 +12,7 @@ The document outlines a new WordPress plugin scraping approach that differs from
 
 ### Actionable Checklist
 
+- [ ] **Create New Scraper Directory** - Set up new directory structure (e.g., `wordpress-plugins-svn`) separate from existing implementation
 - [ ] **SVN Download Strategy** - Need to implement downloading from https://plugins.svn.wordpress.org/ with proper handling for large file
 - [ ] **Slug Extraction** - Build parser to extract plugin slugs from SVN data and save to CSV
 - [ ] **URL Mapping** - Implement slug-to-URL conversion (SVN slug → WordPress.org plugin page)
