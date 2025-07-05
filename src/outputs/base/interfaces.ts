@@ -20,8 +20,11 @@ export interface PipelineResult {
 export interface ScraperConfig {
   name: string;
   baseUrl: string;
+  startUrls?: string[];
   crawlerType?: 'playwright' | 'cheerio';
   maxRequestsPerCrawl?: number;
+  maxConcurrency?: number;
+  requestHandlerTimeoutSecs?: number;
   selectors: Record<string, string>;
   pagination?: {
     nextButtonSelector: string;
@@ -29,6 +32,7 @@ export interface ScraperConfig {
   };
   proxy: {
     enabled: boolean;
+    url?: string;
     rotation: 'session' | 'request';
     countries?: string[];
   };

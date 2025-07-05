@@ -28,14 +28,14 @@ export default class WordpressPluginsScraper extends BaseScraper {
     const { page, request } = context;
     
     // Wait for page to load
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded', { timeout: 60000 });
     
     // Check if we're on the commercial plugins page
     const url = page.url();
     if (!url.includes('plugin_business_model=commercial')) {
       // Navigate to commercial plugins page
       await page.goto('https://wordpress.org/plugins/?plugin_business_model=commercial');
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded', { timeout: 60000 });
     }
     
     // Wait for page to stabilize and debug
@@ -256,7 +256,7 @@ export default class WordpressPluginsScraper extends BaseScraper {
     
     try {
       // Wait for page to load
-      await page.waitForLoadState('networkidle');
+      await page.waitForLoadState('domcontentloaded', { timeout: 60000 });
       
       // Extract all detail fields
       const version = await this.extractVersion(page);

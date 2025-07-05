@@ -1,4 +1,4 @@
-import { PlaywrightCrawler, CheerioCrawler } from 'crawlee';
+import { PlaywrightCrawler, CheerioCrawler, ProxyConfiguration } from 'crawlee';
 import { ConfigLoader } from '../../core/ConfigLoader';
 import { PipelineBuilder } from '../../outputs/pipelines/PipelineBuilder';
 import { Pipeline } from '../../outputs/pipelines/Pipeline';
@@ -14,6 +14,10 @@ export abstract class BaseScraper {
   constructor(configPath: string) {
     this.config = ConfigLoader.load(configPath);
     this.logger = Logger.child({ scraper: this.config.name });
+  }
+
+  get scraperConfig(): ScraperConfig {
+    return this.config;
   }
 
   abstract setupHandlers(): Record<string, Function>;
@@ -41,7 +45,8 @@ export abstract class BaseScraper {
           }
         },
         maxRequestsPerCrawl: this.config.maxRequestsPerCrawl || 100,
-        requestHandlerTimeoutSecs: 60,
+        requestHandlerTimeoutSecs: this.config.requestHandlerTimeoutSecs || 60,
+        maxConcurrency: this.config.maxConcurrency || 3,
         ...this.getProxyConfig(),
         ...this.getRateLimitConfig()
       });
@@ -89,12 +94,15 @@ export abstract class BaseScraper {
   private getProxyConfig(): any {
     if (!this.config.proxy.enabled) return {};
     
-    // Implement proxy configuration based on your proxy service
-    return {
-      proxyConfiguration: {
-        // Add proxy configuration here
-      }
-    };
+    if (this.config.proxy.url) {
+      return {
+        proxyConfiguration: new ProxyConfiguration({
+          proxyUrls: [this.config.proxy.url]
+        })
+      };
+    }
+    
+    return {};
   }
 
   private getRateLimitConfig(): any {
