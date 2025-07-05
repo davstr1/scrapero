@@ -1,0 +1,9 @@
+{
+  "proxy": {
+    "enabled": false
+  },
+  "rateLimit": {
+    "requestsPerMinute": 60
+  },
+  "maxRequestsPerCrawl": 10
+}

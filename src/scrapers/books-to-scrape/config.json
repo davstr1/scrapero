@@ -1,0 +1,51 @@
+{
+  "extends": "global",
+  "name": "books-to-scrape",
+  "baseUrl": "https://books.toscrape.com",
+  "crawlerType": "cheerio",
+  "selectors": {
+    "title": "h3 a",
+    "price": ".price_color",
+    "rating": ".star-rating",
+    "availability": ".availability",
+    "productLink": "h3 a"
+  },
+  "pagination": {
+    "nextButtonSelector": ".next a",
+    "maxPages": 5
+  },
+  "outputs": [
+    {
+      "type": "csv",
+      "enabled": true,
+      "config": {
+        "filename": "books-{date}.csv",
+        "path": "./exports",
+        "headers": true
+      }
+    },
+    {
+      "type": "database",
+      "enabled": false,
+      "config": {
+        "table": "books",
+        "connection": "primary",
+        "upsert": true,
+        "batchSize": 50
+      }
+    }
+  ],
+  "pipeline": {
+    "processors": ["validation"],
+    "errorHandling": "continue",
+    "batchSize": 25
+  },
+  "proxy": {
+    "enabled": false,
+    "rotation": "session"
+  },
+  "rateLimit": {
+    "requestsPerMinute": 30,
+    "delayBetweenRequests": 1000
+  }
+}

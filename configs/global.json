@@ -1,0 +1,17 @@
+{
+  "defaultProxy": {
+    "enabled": false,
+    "rotation": "session",
+    "timeout": 30000
+  },
+  "defaultRateLimit": {
+    "requestsPerMinute": 30,
+    "delayBetweenRequests": 2000
+  },
+  "storage": {
+    "baseDir": "./storage",
+    "retention": "30d"
+  },
+  "crawlerType": "playwright",
+  "maxRequestsPerCrawl": 100
+}

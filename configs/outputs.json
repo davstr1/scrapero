@@ -1,0 +1,25 @@
+{
+  "database": {
+    "connections": {
+      "primary": {
+        "type": "postgresql",
+        "host": "localhost",
+        "port": 5432,
+        "database": "scrapers",
+        "user": "scraper_user",
+        "password": "scraper_pass",
+        "pool": {
+          "min": 2,
+          "max": 10
+        }
+      }
+    }
+  },
+  "csv": {
+    "defaults": {
+      "encoding": "utf8",
+      "delimiter": ",",
+      "headers": true
+    }
+  }
+}

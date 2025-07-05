@@ -1,0 +1,11 @@
+{
+  "proxy": {
+    "enabled": true,
+    "rotation": "request",
+    "countries": ["US", "GB", "DE"]
+  },
+  "rateLimit": {
+    "requestsPerMinute": 10
+  },
+  "maxRequestsPerCrawl": 1000
+}

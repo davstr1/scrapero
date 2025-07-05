@@ -35,7 +35,9 @@ export abstract class BaseScraper {
         requestHandler: async (context) => {
           const data = await this.extractData(context);
           if (data) {
-            await this.pipeline.process([data]);
+            // Handle both single items and arrays
+            const items = Array.isArray(data) ? data : [data];
+            await this.pipeline.process(items);
           }
         },
         maxRequestsPerCrawl: this.config.maxRequestsPerCrawl || 100,
@@ -48,7 +50,9 @@ export abstract class BaseScraper {
         requestHandler: async (context) => {
           const data = await this.extractData(context);
           if (data) {
-            await this.pipeline.process([data]);
+            // Handle both single items and arrays
+            const items = Array.isArray(data) ? data : [data];
+            await this.pipeline.process(items);
           }
         },
         maxRequestsPerCrawl: this.config.maxRequestsPerCrawl || 100,
