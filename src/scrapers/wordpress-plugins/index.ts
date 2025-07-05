@@ -417,8 +417,8 @@ export default class WordpressPluginsScraper extends BaseScraper {
           });
           
           if (fullText && fullText.length > 50) {
-            // Limit to reasonable length (e.g., 2000 chars)
-            return fullText.slice(0, 2000);
+            // Return full text without truncation
+            return fullText;
           }
         }
       }
