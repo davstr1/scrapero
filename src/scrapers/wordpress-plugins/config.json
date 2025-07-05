@@ -18,13 +18,12 @@
     "pluginIcon": ".plugin-icon"
   },
   "pagination": {
-    "nextButtonSelector": ".pagination-links a.next",
+    "nextButtonSelector": "a.next.page-numbers",
     "maxPages": 10
   },
-  // Each page needs ~21 requests (1 listing + 20 detail pages)
-  // 500 requests allows for ~23 pages of results
   "maxRequestsPerCrawl": 500,
   "maxConcurrency": 2,
+  "requestHandlerTimeoutSecs": 300,
   "outputs": [
     {
       "type": "csv",

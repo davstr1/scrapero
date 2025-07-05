@@ -174,30 +174,61 @@ export default class WordpressPluginsScraper extends BaseScraper {
 
     console.log(`Page ${context.request.userData?.pageNumber || 1}: Extracted ${plugins.length} plugins`);
     
-    // Enqueue detail pages for each plugin
-    const detailRequests = plugins.map(plugin => {
-      const slug = plugin.url.split('/').filter(Boolean).pop();
-      return {
-        url: plugin.url,
-        userData: {
-          isDetailPage: true,
-          pluginSlug: slug,
-          listingData: plugin
-        }
-      };
-    });
+    // Wait briefly to ensure page is stable
+    await page.waitForTimeout(500);
     
-    await context.addRequests(detailRequests);
+    
+    // Enqueue detail pages for each plugin
+    const ENABLE_DETAIL_PAGES = true;
+    
+    if (ENABLE_DETAIL_PAGES) {
+      const detailRequests = plugins.map(plugin => {
+        const slug = plugin.url.split('/').filter(Boolean).pop();
+        return {
+          url: plugin.url,
+          userData: {
+            isDetailPage: true,
+            pluginSlug: slug,
+            listingData: plugin
+          }
+        };
+      });
+      
+      await context.addRequests(detailRequests);
+    }
     
     // Handle pagination
+    // Note: Each page needs ~21 requests (1 listing + 20 detail pages)
+    // With maxRequestsPerCrawl=500, we can handle ~23 pages
     const currentPage = context.request.userData?.pageNumber || 1;
     const maxPages = this.config.pagination?.maxPages || 2;
     
     console.log(`Processing page ${currentPage} of max ${maxPages}`);
     
-    const hasNextPage = await page.$('.pagination-links a.next:not(.disabled)');
+    // Check for pagination
+    // Try different selectors for next page
+    const nextSelectors = [
+      '.pagination-links a.next:not(.disabled)',
+      '.pagination-links .next.page-numbers:not(.disabled)',
+      'a.next.page-numbers',
+      '.pagination a.next'
+    ];
+    
+    let hasNextPage = null;
+    let workingSelector = null;
+    
+    for (const selector of nextSelectors) {
+      hasNextPage = await page.$(selector);
+      if (hasNextPage) {
+        workingSelector = selector;
+        break;
+      }
+    }
+    
+    console.log(`Has next page: ${!!hasNextPage}, Selector: ${workingSelector}, Current page: ${currentPage}, Max pages: ${maxPages}`);
+    
     if (hasNextPage && currentPage < maxPages) {
-      const nextPageUrl = await page.$eval('.pagination-links a.next', (el) => el.getAttribute('href'));
+      const nextPageUrl = await page.$eval(workingSelector, (el) => el.getAttribute('href'));
       if (nextPageUrl) {
         console.log(`Found next page, enqueueing: ${nextPageUrl}`);
         await context.addRequests([{
@@ -205,6 +236,8 @@ export default class WordpressPluginsScraper extends BaseScraper {
           userData: { pageNumber: currentPage + 1 }
         }]);
       }
+    } else if (!hasNextPage) {
+      console.log('No more pages available');
     }
 
     // Don't return listing data - it will be enriched and returned from detail pages
