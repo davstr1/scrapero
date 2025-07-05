@@ -29,7 +29,7 @@
       "type": "csv",
       "enabled": true,
       "config": {
-        "filename": "wordpress-commercial-plugins-{date}.csv",
+        "filename": "wordpress-plugins-full-scrape-{date}.csv",
         "path": "./exports",
         "headers": true
       }
