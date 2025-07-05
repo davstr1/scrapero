@@ -37,9 +37,7 @@ export class CSVAdapter extends OutputAdapter {
 
       // Write data rows
       for (const row of data) {
-        const values = Object.values(row).map(val => 
-          typeof val === 'string' && val.includes(',') ? `"${val}"` : val
-        );
+        const values = Object.values(row).map(val => this.escapeCSVField(val));
         this.writeStream.write(values.join(this.config.config.delimiter || ',') + '\n');
       }
 
@@ -80,5 +78,27 @@ export class CSVAdapter extends OutputAdapter {
       .replace('{scraper}', this.config.config.scraperName || 'unknown');
     
     return path.join(this.config.config.path || './exports', filename);
+  }
+
+  private escapeCSVField(field: any): string {
+    if (field === null || field === undefined) return '';
+    
+    const stringValue = String(field);
+    
+    // Check if field needs quoting
+    const needsQuoting = stringValue.includes(',') || 
+                        stringValue.includes('"') || 
+                        stringValue.includes('\n') || 
+                        stringValue.includes('\r') ||
+                        stringValue.startsWith(' ') ||
+                        stringValue.endsWith(' ');
+    
+    if (needsQuoting) {
+      // Escape quotes by doubling them
+      const escaped = stringValue.replace(/"/g, '""');
+      return `"${escaped}"`;
+    }
+    
+    return stringValue;
   }
 }

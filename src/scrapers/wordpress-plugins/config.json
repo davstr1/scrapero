@@ -1,0 +1,48 @@
+{
+  "extends": "global",
+  "name": "wordpress-plugins",
+  "baseUrl": "https://wordpress.org/plugins",
+  "crawlerType": "playwright",
+  "selectors": {
+    "pluginCard": "article.plugin-card",
+    "pluginName": "h3.entry-title a",
+    "pluginUrl": "h3.entry-title a",
+    "author": ".plugin-author span",
+    "description": ".entry-excerpt",
+    "rating": ".wporg-ratings",
+    "ratingCount": ".rating-count",
+    "activeInstalls": ".active-installs span",
+    "lastUpdated": ".plugin-last-updated",
+    "testedUpTo": ".tested-with span",
+    "pluginIcon": ".plugin-icon"
+  },
+  "pagination": {
+    "nextButtonSelector": ".pagination-links a.next",
+    "maxPages": 2
+  },
+  "maxRequestsPerCrawl": 2,
+  "outputs": [
+    {
+      "type": "csv",
+      "enabled": true,
+      "config": {
+        "filename": "wordpress-commercial-plugins-{date}.csv",
+        "path": "./exports",
+        "headers": true
+      }
+    }
+  ],
+  "pipeline": {
+    "processors": ["validation", "normalization"],
+    "errorHandling": "continue",
+    "batchSize": 50
+  },
+  "proxy": {
+    "enabled": false,
+    "rotation": "session"
+  },
+  "rateLimit": {
+    "requestsPerMinute": 20,
+    "delayBetweenRequests": 3000
+  }
+}
