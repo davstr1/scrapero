@@ -26,7 +26,7 @@ program
       const scraper = ScraperFactory.create(scraperName);
       
       // Load URLs from options or config
-      const urls = options.urls || ['https://example.com'];
+      const urls = options.urls || scraper.config.startUrls || [scraper.config.baseUrl];
       
       await scraper.run(urls);
       logger.info('Scraper completed successfully');

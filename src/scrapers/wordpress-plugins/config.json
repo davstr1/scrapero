@@ -2,6 +2,7 @@
   "extends": "global",
   "name": "wordpress-plugins",
   "baseUrl": "https://wordpress.org/plugins",
+  "startUrls": ["https://wordpress.org/plugins/?plugin_business_model=commercial"],
   "crawlerType": "playwright",
   "selectors": {
     "pluginCard": "article.plugin-card",
