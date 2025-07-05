@@ -85,9 +85,21 @@ src/
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "baseUrl": "./",
     "paths": {
-      "@/*": ["./src/*"]
+      "@core/*": ["./src/core/*"],
+      "@plugins/*": ["./src/plugins/*"],
+      "@runtime/*": ["./src/runtime/*"],
+      "@api/*": ["./src/api/*"],
+      "@types/*": ["./src/types/*"]
     }
   },
   "include": ["src/**/*"],
