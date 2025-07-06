@@ -1,0 +1,28 @@
+{
+  "name": "wix-app-market-scraper",
+  "version": "1.0.0",
+  "description": "Scraper for Wix App Market using Puppeteer",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "discover": "node index.js discover-categories",
+    "collect": "node index.js collect-urls",
+    "scrape": "node index.js scrape-apps",
+    "full": "node index.js full"
+  },
+  "keywords": ["wix", "scraper", "puppeteer", "app-market"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "puppeteer": "^22.0.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "https-proxy-agent": "^7.0.0",
+    "commander": "^11.0.0",
+    "csv-parser": "^3.0.0",
+    "csv-writer": "^1.6.0",
+    "p-limit": "^3.1.0",
+    "progress": "^2.0.3",
+    "chalk": "^4.1.2"
+  }
+}

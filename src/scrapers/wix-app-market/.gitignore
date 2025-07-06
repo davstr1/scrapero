@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Output files
+output/*.csv
+output/*.json
+
+# Temporary files
+temp/*.csv
+temp/*.json
+temp/*.html
+temp/screenshots/
+
+# Logs
+*.log
+logs/
+
+# Environment variables
+.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Debug files
+debug/

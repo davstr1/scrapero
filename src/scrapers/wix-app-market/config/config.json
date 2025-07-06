@@ -1,0 +1,113 @@
+{
+  "scraper": {
+    "name": "Wix App Market Scraper",
+    "version": "1.0.0",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+  },
+  "urls": {
+    "base": "https://www.wix.com/app-market",
+    "categories": "https://www.wix.com/app-market/category",
+    "app": "https://www.wix.com/app-market/web-solution"
+  },
+  "browser": {
+    "headless": true,
+    "concurrency": 5,
+    "pageTimeout": 60000,
+    "navigationTimeout": 60000,
+    "waitForTimeout": 30000,
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "args": [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-accelerated-2d-canvas",
+      "--disable-gpu"
+    ]
+  },
+  "proxy": {
+    "enabled": false,
+    "url": "http://sxbrfiav:z1rnitsp7b1x@82.25.216.29:6871/",
+    "rotateOnError": true
+  },
+  "delays": {
+    "betweenRequests": 3000,
+    "afterScroll": 1000,
+    "beforeExtraction": 2000,
+    "onError": 5000
+  },
+  "retry": {
+    "maxAttempts": 3,
+    "delay": 2000,
+    "backoffMultiplier": 2
+  },
+  "selectors": {
+    "categories": {
+      "mainCategory": "a[href*='/category/']",
+      "subcategory": "[data-hook='subcategory-link']",
+      "viewAll": "a:contains('View All')"
+    },
+    "appList": {
+      "appCard": "[data-hook='app-card']",
+      "appLink": "a[href*='/web-solution/']",
+      "appName": "[data-hook='app-name']",
+      "loadMore": "button:contains('Load More')"
+    },
+    "appDetail": {
+      "name": "h1",
+      "icon": "[data-hook='app-icon'] img",
+      "shortDescription": "[data-hook='app-tagline']",
+      "fullDescription": "[data-hook='description-content']",
+      "rating": "[data-hook='rating-value']",
+      "reviewCount": "[data-hook='review-count']",
+      "ratingBreakdown": "[data-hook='rating-bar']",
+      "price": "[data-hook='price-tag']",
+      "developer": "[data-hook='developer-name']",
+      "developerEmail": "[data-hook='support-email']",
+      "installs": "[data-hook='installs-count']",
+      "screenshots": "[data-hook='screenshot'] img",
+      "category": "[data-hook='category-link']",
+      "languages": "[data-hook='languages']",
+      "lastUpdated": "[data-hook='last-updated']"
+    }
+  },
+  "output": {
+    "format": "csv",
+    "encoding": "utf8",
+    "headers": [
+      "name",
+      "slug",
+      "url",
+      "icon",
+      "shortDescription",
+      "fullDescription",
+      "averageRating",
+      "totalReviews",
+      "rating5Star",
+      "rating4Star",
+      "rating3Star",
+      "rating2Star",
+      "rating1Star",
+      "hasFreeVersion",
+      "pricingTiers",
+      "developer",
+      "developerEmail",
+      "developerWebsite",
+      "installCount",
+      "primaryCategory",
+      "subCategory",
+      "tags",
+      "screenshots",
+      "languages",
+      "lastUpdated",
+      "scrapedAt"
+    ]
+  },
+  "logging": {
+    "level": "info",
+    "screenshotOnError": true,
+    "saveHtmlOnError": true
+  }
+}
