@@ -527,7 +527,6 @@ class PluginScraper {
       .replace(/^Description\s*/i, '')
       .replace(/\n+/g, ' ')
       .replace(/\s+/g, ' ')
-      .substring(0, 1000)
       .trim();
   }
 

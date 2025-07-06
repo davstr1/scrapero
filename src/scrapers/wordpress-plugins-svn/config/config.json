@@ -18,13 +18,13 @@
   },
   "scraping": {
     "baseUrl": "https://wordpress.org/plugins/",
-    "concurrency": 10,
-    "requestTimeout": 30000,
+    "concurrency": 50,
+    "requestTimeout": 15000,
     "retries": 3,
-    "retryDelay": 2000,
+    "retryDelay": 1000,
     "progressInterval": 100,
     "rateLimit": {
-      "maxRequests": 50,
+      "maxRequests": 500,
       "perSeconds": 10
     }
   },
