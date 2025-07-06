@@ -78,6 +78,8 @@ async function discoverCommand(options) {
       // Merge discovery info
       if (!existingApp.discoveredFrom) {
         existingApp.discoveredFrom = [];
+      } else if (typeof existingApp.discoveredFrom === 'string') {
+        existingApp.discoveredFrom = [existingApp.discoveredFrom];
       }
       if (app.discoveredFrom && !existingApp.discoveredFrom.includes(app.discoveredFrom)) {
         existingApp.discoveredFrom.push(app.discoveredFrom);

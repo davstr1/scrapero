@@ -1,0 +1,840 @@
+{
+  "timestamp": "2025-07-06T23:53:32.124Z",
+  "categories": [
+    {
+      "slug": "marketing",
+      "name": "Marketing",
+      "url": "https://www.wix.com/app-market/category/marketing",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "marketing",
+      "name": "Marketing",
+      "url": "https://www.wix.com/app-market/category/marketing",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "marketing",
+      "name": "Marketing",
+      "url": "https://www.wix.com/app-market/category/marketing",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "marketing",
+      "name": "Marketing",
+      "url": "https://www.wix.com/app-market/category/marketing",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "marketing",
+      "name": "Marketing",
+      "url": "https://www.wix.com/app-market/category/marketing",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "marketing",
+      "name": "Marketing",
+      "url": "https://www.wix.com/app-market/category/marketing",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "marketing",
+      "name": "Marketing",
+      "url": "https://www.wix.com/app-market/category/marketing",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "marketing",
+      "name": "Marketing",
+      "url": "https://www.wix.com/app-market/category/marketing",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "marketing",
+      "name": "Marketing",
+      "url": "https://www.wix.com/app-market/category/marketing",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "marketing",
+      "name": "Marketing",
+      "url": "https://www.wix.com/app-market/category/marketing",
+      "subcategories": [
+        {
+          "slug": "ads",
+          "name": "Ads",
+          "url": "https://www.wix.com/app-market/category/marketing/ads",
+          "parentSlug": "marketing",
+          "appCount": 0
+        },
+        {
+          "slug": "mobile",
+          "name": "Mobile Apps",
+          "url": "https://www.wix.com/app-market/category/marketing/mobile",
+          "parentSlug": "marketing",
+          "appCount": 0
+        },
+        {
+          "slug": "analytics",
+          "name": "Analytics",
+          "url": "https://www.wix.com/app-market/category/marketing/analytics",
+          "parentSlug": "marketing",
+          "appCount": 0
+        },
+        {
+          "slug": "social",
+          "name": "Social",
+          "url": "https://www.wix.com/app-market/category/marketing/social",
+          "parentSlug": "marketing",
+          "appCount": 0
+        },
+        {
+          "slug": "seo",
+          "name": "SEO",
+          "url": "https://www.wix.com/app-market/category/marketing/seo",
+          "parentSlug": "marketing",
+          "appCount": 0
+        },
+        {
+          "slug": "engagement",
+          "name": "Engagement",
+          "url": "https://www.wix.com/app-market/category/marketing/engagement",
+          "parentSlug": "marketing",
+          "appCount": 0
+        },
+        {
+          "slug": "site-listings",
+          "name": "Site Listings",
+          "url": "https://www.wix.com/app-market/category/marketing/site-listings",
+          "parentSlug": "marketing",
+          "appCount": 0
+        },
+        {
+          "slug": "email",
+          "name": "Email",
+          "url": "https://www.wix.com/app-market/category/marketing/email",
+          "parentSlug": "marketing",
+          "appCount": 0
+        },
+        {
+          "slug": "conversion",
+          "name": "Conversion",
+          "url": "https://www.wix.com/app-market/category/marketing/conversion",
+          "parentSlug": "marketing",
+          "appCount": 0
+        }
+      ],
+      "appCount": 4
+    },
+    {
+      "slug": "ecommerce",
+      "name": "Sell Online",
+      "url": "https://www.wix.com/app-market/category/ecommerce",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "ecommerce",
+      "name": "Sell Online",
+      "url": "https://www.wix.com/app-market/category/ecommerce",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "ecommerce",
+      "name": "Sell Online",
+      "url": "https://www.wix.com/app-market/category/ecommerce",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "ecommerce",
+      "name": "Sell Online",
+      "url": "https://www.wix.com/app-market/category/ecommerce",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "ecommerce",
+      "name": "Sell Online",
+      "url": "https://www.wix.com/app-market/category/ecommerce",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "ecommerce",
+      "name": "Sell Online",
+      "url": "https://www.wix.com/app-market/category/ecommerce",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "ecommerce",
+      "name": "Sell Online",
+      "url": "https://www.wix.com/app-market/category/ecommerce",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "ecommerce",
+      "name": "Sell Online",
+      "url": "https://www.wix.com/app-market/category/ecommerce",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "ecommerce",
+      "name": "Sell Online",
+      "url": "https://www.wix.com/app-market/category/ecommerce",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "ecommerce",
+      "name": "Sell Online",
+      "url": "https://www.wix.com/app-market/category/ecommerce",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "ecommerce",
+      "name": "Sell Online",
+      "url": "https://www.wix.com/app-market/category/ecommerce",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "ecommerce",
+      "name": "Sell Online",
+      "url": "https://www.wix.com/app-market/category/ecommerce",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "ecommerce",
+      "name": "Sell Online",
+      "url": "https://www.wix.com/app-market/category/ecommerce",
+      "subcategories": [
+        {
+          "slug": "stores",
+          "name": "Stores",
+          "url": "https://www.wix.com/app-market/category/ecommerce/stores",
+          "parentSlug": "ecommerce",
+          "appCount": 0
+        },
+        {
+          "slug": "shipping--delivery",
+          "name": "Shipping & Delivery",
+          "url": "https://www.wix.com/app-market/category/ecommerce/shipping--delivery",
+          "parentSlug": "ecommerce",
+          "appCount": 0
+        },
+        {
+          "slug": "sell-buttons",
+          "name": "Sell Buttons",
+          "url": "https://www.wix.com/app-market/category/ecommerce/sell-buttons",
+          "parentSlug": "ecommerce",
+          "appCount": 0
+        },
+        {
+          "slug": "online-courses",
+          "name": "Online Courses",
+          "url": "https://www.wix.com/app-market/category/ecommerce/online-courses",
+          "parentSlug": "ecommerce",
+          "appCount": 0
+        },
+        {
+          "slug": "print-on-demand",
+          "name": "Print on Demand",
+          "url": "https://www.wix.com/app-market/category/ecommerce/print-on-demand",
+          "parentSlug": "ecommerce",
+          "appCount": 0
+        },
+        {
+          "slug": "accounting",
+          "name": "Accounting",
+          "url": "https://www.wix.com/app-market/category/ecommerce/accounting",
+          "parentSlug": "ecommerce",
+          "appCount": 0
+        },
+        {
+          "slug": "coupons--loyalty",
+          "name": "Coupons & Loyalty",
+          "url": "https://www.wix.com/app-market/category/ecommerce/coupons--loyalty",
+          "parentSlug": "ecommerce",
+          "appCount": 0
+        },
+        {
+          "slug": "warehousing-solutions",
+          "name": "Warehousing Solutions",
+          "url": "https://www.wix.com/app-market/category/ecommerce/warehousing-solutions",
+          "parentSlug": "ecommerce",
+          "appCount": 0
+        },
+        {
+          "slug": "dropship",
+          "name": "Dropship",
+          "url": "https://www.wix.com/app-market/category/ecommerce/dropship",
+          "parentSlug": "ecommerce",
+          "appCount": 0
+        },
+        {
+          "slug": "pricing--subscription",
+          "name": "Pricing & Subscription",
+          "url": "https://www.wix.com/app-market/category/ecommerce/pricing--subscription",
+          "parentSlug": "ecommerce",
+          "appCount": 0
+        },
+        {
+          "slug": "crowdfunding",
+          "name": "Crowdfunding",
+          "url": "https://www.wix.com/app-market/category/ecommerce/crowdfunding",
+          "parentSlug": "ecommerce",
+          "appCount": 0
+        },
+        {
+          "slug": "food-beverage",
+          "name": "Food Beverage",
+          "url": "https://www.wix.com/app-market/category/ecommerce/food-beverage",
+          "parentSlug": "ecommerce",
+          "appCount": 0
+        }
+      ],
+      "appCount": 4
+    },
+    {
+      "slug": "booking--events",
+      "name": "Services & Events",
+      "url": "https://www.wix.com/app-market/category/booking--events",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "booking--events",
+      "name": "Services & Events",
+      "url": "https://www.wix.com/app-market/category/booking--events",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "booking--events",
+      "name": "Services & Events",
+      "url": "https://www.wix.com/app-market/category/booking--events",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "booking--events",
+      "name": "Services & Events",
+      "url": "https://www.wix.com/app-market/category/booking--events",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "booking--events",
+      "name": "Services & Events",
+      "url": "https://www.wix.com/app-market/category/booking--events",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "booking--events",
+      "name": "Services & Events",
+      "url": "https://www.wix.com/app-market/category/booking--events",
+      "subcategories": [
+        {
+          "slug": "hotels",
+          "name": "Hotels",
+          "url": "https://www.wix.com/app-market/category/booking--events/hotels",
+          "parentSlug": "booking--events",
+          "appCount": 0
+        },
+        {
+          "slug": "events",
+          "name": "Events",
+          "url": "https://www.wix.com/app-market/category/booking--events/events",
+          "parentSlug": "booking--events",
+          "appCount": 0
+        },
+        {
+          "slug": "restaurants",
+          "name": "Restaurants",
+          "url": "https://www.wix.com/app-market/category/booking--events/restaurants",
+          "parentSlug": "booking--events",
+          "appCount": 0
+        },
+        {
+          "slug": "real-estate",
+          "name": "Real Estate",
+          "url": "https://www.wix.com/app-market/category/booking--events/real-estate",
+          "parentSlug": "booking--events",
+          "appCount": 0
+        },
+        {
+          "slug": "bookings",
+          "name": "Bookings",
+          "url": "https://www.wix.com/app-market/category/booking--events/bookings",
+          "parentSlug": "booking--events",
+          "appCount": 0
+        }
+      ],
+      "appCount": 0
+    },
+    {
+      "slug": "media--content",
+      "name": "Media & Content",
+      "url": "https://www.wix.com/app-market/category/media--content",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "media--content",
+      "name": "Media & Content",
+      "url": "https://www.wix.com/app-market/category/media--content",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "media--content",
+      "name": "Media & Content",
+      "url": "https://www.wix.com/app-market/category/media--content",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "media--content",
+      "name": "Media & Content",
+      "url": "https://www.wix.com/app-market/category/media--content",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "media--content",
+      "name": "Media & Content",
+      "url": "https://www.wix.com/app-market/category/media--content",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "media--content",
+      "name": "Media & Content",
+      "url": "https://www.wix.com/app-market/category/media--content",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "media--content",
+      "name": "Media & Content",
+      "url": "https://www.wix.com/app-market/category/media--content",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "media--content",
+      "name": "Media & Content",
+      "url": "https://www.wix.com/app-market/category/media--content",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "media--content",
+      "name": "Media & Content",
+      "url": "https://www.wix.com/app-market/category/media--content",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "media--content",
+      "name": "Media & Content",
+      "url": "https://www.wix.com/app-market/category/media--content",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "media--content",
+      "name": "Media & Content",
+      "url": "https://www.wix.com/app-market/category/media--content",
+      "subcategories": [
+        {
+          "slug": "gallery",
+          "name": "Gallery",
+          "url": "https://www.wix.com/app-market/category/media--content/gallery",
+          "parentSlug": "media--content",
+          "appCount": 0
+        },
+        {
+          "slug": "music",
+          "name": "Music",
+          "url": "https://www.wix.com/app-market/category/media--content/music",
+          "parentSlug": "media--content",
+          "appCount": 0
+        },
+        {
+          "slug": "podcasts",
+          "name": "Podcasts",
+          "url": "https://www.wix.com/app-market/category/media--content/podcasts",
+          "parentSlug": "media--content",
+          "appCount": 0
+        },
+        {
+          "slug": "photography",
+          "name": "Photography",
+          "url": "https://www.wix.com/app-market/category/media--content/photography",
+          "parentSlug": "media--content",
+          "appCount": 0
+        },
+        {
+          "slug": "video",
+          "name": "Video",
+          "url": "https://www.wix.com/app-market/category/media--content/video",
+          "parentSlug": "media--content",
+          "appCount": 0
+        },
+        {
+          "slug": "pdf",
+          "name": "Pdf",
+          "url": "https://www.wix.com/app-market/category/media--content/pdf",
+          "parentSlug": "media--content",
+          "appCount": 0
+        },
+        {
+          "slug": "file-sharing",
+          "name": "File Sharing",
+          "url": "https://www.wix.com/app-market/category/media--content/file-sharing",
+          "parentSlug": "media--content",
+          "appCount": 0
+        },
+        {
+          "slug": "news",
+          "name": "News",
+          "url": "https://www.wix.com/app-market/category/media--content/news",
+          "parentSlug": "media--content",
+          "appCount": 0
+        },
+        {
+          "slug": "content-services",
+          "name": "Content Services",
+          "url": "https://www.wix.com/app-market/category/media--content/content-services",
+          "parentSlug": "media--content",
+          "appCount": 0
+        },
+        {
+          "slug": "text-effects",
+          "name": "Text Effects",
+          "url": "https://www.wix.com/app-market/category/media--content/text-effects",
+          "parentSlug": "media--content",
+          "appCount": 0
+        }
+      ],
+      "appCount": 1
+    },
+    {
+      "slug": "design-elements",
+      "name": "Design Elements",
+      "url": "https://www.wix.com/app-market/category/design-elements",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "design-elements",
+      "name": "Design Elements",
+      "url": "https://www.wix.com/app-market/category/design-elements",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "design-elements",
+      "name": "Design Elements",
+      "url": "https://www.wix.com/app-market/category/design-elements",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "design-elements",
+      "name": "Design Elements",
+      "url": "https://www.wix.com/app-market/category/design-elements",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "design-elements",
+      "name": "Design Elements",
+      "url": "https://www.wix.com/app-market/category/design-elements",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "design-elements",
+      "name": "Design Elements",
+      "url": "https://www.wix.com/app-market/category/design-elements",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "design-elements",
+      "name": "Design Elements",
+      "url": "https://www.wix.com/app-market/category/design-elements",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "design-elements",
+      "name": "Design Elements",
+      "url": "https://www.wix.com/app-market/category/design-elements",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "design-elements",
+      "name": "Design Elements",
+      "url": "https://www.wix.com/app-market/category/design-elements",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "design-elements",
+      "name": "Design Elements",
+      "url": "https://www.wix.com/app-market/category/design-elements",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "design-elements",
+      "name": "Design Elements",
+      "url": "https://www.wix.com/app-market/category/design-elements",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "design-elements",
+      "name": "Design Elements",
+      "url": "https://www.wix.com/app-market/category/design-elements",
+      "subcategories": [
+        {
+          "slug": "maps--navigation",
+          "name": "Maps & Navigation",
+          "url": "https://www.wix.com/app-market/category/design-elements/maps--navigation",
+          "parentSlug": "design-elements",
+          "appCount": 0
+        },
+        {
+          "slug": "privacy--security",
+          "name": "Privacy & Security",
+          "url": "https://www.wix.com/app-market/category/design-elements/privacy--security",
+          "parentSlug": "design-elements",
+          "appCount": 0
+        },
+        {
+          "slug": "clock",
+          "name": "Clock",
+          "url": "https://www.wix.com/app-market/category/design-elements/clock",
+          "parentSlug": "design-elements",
+          "appCount": 0
+        },
+        {
+          "slug": "page-templates",
+          "name": "Page Templates",
+          "url": "https://www.wix.com/app-market/category/design-elements/page-templates",
+          "parentSlug": "design-elements",
+          "appCount": 0
+        },
+        {
+          "slug": "image-effects",
+          "name": "Image Effects",
+          "url": "https://www.wix.com/app-market/category/design-elements/image-effects",
+          "parentSlug": "design-elements",
+          "appCount": 0
+        },
+        {
+          "slug": "buttons--menus",
+          "name": "Buttons & Menus",
+          "url": "https://www.wix.com/app-market/category/design-elements/buttons--menus",
+          "parentSlug": "design-elements",
+          "appCount": 0
+        },
+        {
+          "slug": "banners--badges",
+          "name": "Banners & Badges",
+          "url": "https://www.wix.com/app-market/category/design-elements/banners--badges",
+          "parentSlug": "design-elements",
+          "appCount": 0
+        },
+        {
+          "slug": "calculators",
+          "name": "Calculators",
+          "url": "https://www.wix.com/app-market/category/design-elements/calculators",
+          "parentSlug": "design-elements",
+          "appCount": 0
+        },
+        {
+          "slug": "search",
+          "name": "Search",
+          "url": "https://www.wix.com/app-market/category/design-elements/search",
+          "parentSlug": "design-elements",
+          "appCount": 0
+        },
+        {
+          "slug": "weather",
+          "name": "Weather",
+          "url": "https://www.wix.com/app-market/category/design-elements/weather",
+          "parentSlug": "design-elements",
+          "appCount": 0
+        },
+        {
+          "slug": "charts--tables",
+          "name": "Charts & Tables",
+          "url": "https://www.wix.com/app-market/category/design-elements/charts--tables",
+          "parentSlug": "design-elements",
+          "appCount": 0
+        }
+      ],
+      "appCount": 4
+    },
+    {
+      "slug": "communication",
+      "name": "Communication",
+      "url": "https://www.wix.com/app-market/category/communication",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "communication",
+      "name": "Communication",
+      "url": "https://www.wix.com/app-market/category/communication",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "communication",
+      "name": "Communication",
+      "url": "https://www.wix.com/app-market/category/communication",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "communication",
+      "name": "Communication",
+      "url": "https://www.wix.com/app-market/category/communication",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "communication",
+      "name": "Communication",
+      "url": "https://www.wix.com/app-market/category/communication",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "communication",
+      "name": "Communication",
+      "url": "https://www.wix.com/app-market/category/communication",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "communication",
+      "name": "Communication",
+      "url": "https://www.wix.com/app-market/category/communication",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "communication",
+      "name": "Communication",
+      "url": "https://www.wix.com/app-market/category/communication",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "communication",
+      "name": "Communication",
+      "url": "https://www.wix.com/app-market/category/communication",
+      "subcategories": [],
+      "appCount": 0
+    },
+    {
+      "slug": "communication",
+      "name": "Communication",
+      "url": "https://www.wix.com/app-market/category/communication",
+      "subcategories": [
+        {
+          "slug": "forms",
+          "name": "Forms & Surveys",
+          "url": "https://www.wix.com/app-market/category/communication/forms",
+          "parentSlug": "communication",
+          "appCount": 0
+        },
+        {
+          "slug": "blogs",
+          "name": "Blogs",
+          "url": "https://www.wix.com/app-market/category/communication/blogs",
+          "parentSlug": "communication",
+          "appCount": 0
+        },
+        {
+          "slug": "polls",
+          "name": "Polls",
+          "url": "https://www.wix.com/app-market/category/communication/polls",
+          "parentSlug": "communication",
+          "appCount": 0
+        },
+        {
+          "slug": "chat",
+          "name": "Live Chat",
+          "url": "https://www.wix.com/app-market/category/communication/chat",
+          "parentSlug": "communication",
+          "appCount": 0
+        },
+        {
+          "slug": "comments",
+          "name": "Comments",
+          "url": "https://www.wix.com/app-market/category/communication/comments",
+          "parentSlug": "communication",
+          "appCount": 0
+        },
+        {
+          "slug": "phone",
+          "name": "Phone",
+          "url": "https://www.wix.com/app-market/category/communication/phone",
+          "parentSlug": "communication",
+          "appCount": 0
+        },
+        {
+          "slug": "community",
+          "name": "Community & Forum",
+          "url": "https://www.wix.com/app-market/category/communication/community",
+          "parentSlug": "communication",
+          "appCount": 0
+        },
+        {
+          "slug": "reviews--testimonials",
+          "name": "Reviews & Testimonials",
+          "url": "https://www.wix.com/app-market/category/communication/reviews--testimonials",
+          "parentSlug": "communication",
+          "appCount": 0
+        },
+        {
+          "slug": "crm",
+          "name": "CRM",
+          "url": "https://www.wix.com/app-market/category/communication/crm",
+          "parentSlug": "communication",
+          "appCount": 0
+        }
+      ],
+      "appCount": 4
+    }
+  ],
+  "totalCategories": 62,
+  "totalSubcategories": 56,
+  "totalApps": 1191
+}
