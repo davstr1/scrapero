@@ -41,15 +41,55 @@ async function discoverCommand(options) {
   // Step 3: Merge results
   console.log('\nStep 3: Merging discovery results...');
   
-  // Combine sitemap apps with discovered apps
-  const allApps = [...sitemapApps];
+  // Create a Map to track unique apps by slug
+  const uniqueAppsMap = new Map();
   
-  // Add discovered apps that aren't in sitemap
+  // Add sitemap apps first
+  for (const app of sitemapApps) {
+    uniqueAppsMap.set(app.slug, app);
+  }
+  
+  // Add discovered apps, merging category data if app already exists
   for (const app of urls.apps) {
-    if (!allApps.some(a => a.slug === app.slug)) {
-      allApps.push(app);
+    if (uniqueAppsMap.has(app.slug)) {
+      // App already exists, merge category data
+      const existingApp = uniqueAppsMap.get(app.slug);
+      
+      // Merge categories
+      if (!existingApp.additionalCategories) {
+        existingApp.additionalCategories = [];
+      }
+      if (app.category && app.category !== existingApp.category) {
+        existingApp.additionalCategories.push(app.category);
+      }
+      
+      // Merge subcategories
+      if (app.subcategories && app.subcategories.length > 0) {
+        if (!existingApp.allSubcategories) {
+          existingApp.allSubcategories = [...(existingApp.subcategories || [])];
+        }
+        for (const subcat of app.subcategories) {
+          if (!existingApp.allSubcategories.some(s => s.id === subcat.id)) {
+            existingApp.allSubcategories.push(subcat);
+          }
+        }
+      }
+      
+      // Merge discovery info
+      if (!existingApp.discoveredFrom) {
+        existingApp.discoveredFrom = [];
+      }
+      if (app.discoveredFrom && !existingApp.discoveredFrom.includes(app.discoveredFrom)) {
+        existingApp.discoveredFrom.push(app.discoveredFrom);
+      }
+    } else {
+      // New app, add to map
+      uniqueAppsMap.set(app.slug, app);
     }
   }
+  
+  // Convert map back to array
+  const allApps = Array.from(uniqueAppsMap.values());
   
   // Update the discovery results
   urls.apps = allApps;

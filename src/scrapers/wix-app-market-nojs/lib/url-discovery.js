@@ -13,6 +13,8 @@ class UrlDiscovery {
       apps: [],
       timestamp: Utils.getTimestamp()
     };
+    // Use a Map to track unique apps by slug
+    this.uniqueAppsMap = new Map();
   }
 
   async discoverAll() {
@@ -26,6 +28,9 @@ class UrlDiscovery {
     
     // Step 3: Extract app URLs from all pages
     await this.discoverAppUrls();
+    
+    // Convert Map to array for final output
+    this.discoveredUrls.apps = Array.from(this.uniqueAppsMap.values());
     
     // Save results
     await Utils.writeJsonFile(config.output.urlsFile, this.discoveredUrls);
@@ -273,17 +278,42 @@ class UrlDiscovery {
         });
         
         const newApps = Array.from(appLinks).map(item => JSON.parse(item));
-        const uniqueNewApps = newApps.filter(app => 
-          !this.discoveredUrls.apps.some(existing => existing.slug === app.slug)
-        );
+        let newAppsAdded = 0;
         
-        if (uniqueNewApps.length === 0) {
+        for (const app of newApps) {
+          if (this.uniqueAppsMap.has(app.slug)) {
+            // App already exists, merge category data
+            const existingApp = this.uniqueAppsMap.get(app.slug);
+            
+            // Track additional categories
+            if (!existingApp.additionalCategories) {
+              existingApp.additionalCategories = [];
+            }
+            if (app.category && app.category !== existingApp.category && 
+                !existingApp.additionalCategories.includes(app.category)) {
+              existingApp.additionalCategories.push(app.category);
+            }
+            
+            // Track discovery sources
+            if (!existingApp.discoveredFromPages) {
+              existingApp.discoveredFromPages = [existingApp.discoveredFrom];
+            }
+            if (!existingApp.discoveredFromPages.includes(app.discoveredFrom)) {
+              existingApp.discoveredFromPages.push(app.discoveredFrom);
+            }
+          } else {
+            // New app, add to map
+            this.uniqueAppsMap.set(app.slug, app);
+            newAppsAdded++;
+          }
+        }
+        
+        if (newAppsAdded === 0) {
           // No new apps found, stop pagination
           hasMorePages = false;
         } else {
-          this.discoveredUrls.apps.push(...uniqueNewApps);
-          totalAppsFound += uniqueNewApps.length;
-          console.log(`  Page ${pageNum}: Found ${uniqueNewApps.length} new apps`);
+          totalAppsFound += newAppsAdded;
+          console.log(`  Page ${pageNum}: Found ${newAppsAdded} new apps (${newApps.length - newAppsAdded} duplicates merged)`);
           pageNum++;
         }
         
