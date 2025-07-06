@@ -186,6 +186,32 @@ class AppScraper {
   }
 
   async saveResults(results, format = 'csv') {
+    // Validate no duplicates before saving
+    const slugs = results.map(app => app.slug);
+    const uniqueSlugs = [...new Set(slugs)];
+    
+    if (slugs.length !== uniqueSlugs.length) {
+      console.warn('\n⚠️  WARNING: Duplicates detected in results!');
+      console.warn(`- Total apps: ${slugs.length}`);
+      console.warn(`- Unique apps: ${uniqueSlugs.length}`);
+      console.warn(`- Duplicates: ${slugs.length - uniqueSlugs.length}`);
+      
+      // Find and log duplicate slugs
+      const slugCounts = {};
+      slugs.forEach(slug => {
+        slugCounts[slug] = (slugCounts[slug] || 0) + 1;
+      });
+      
+      const duplicates = Object.entries(slugCounts)
+        .filter(([slug, count]) => count > 1)
+        .sort((a, b) => b[1] - a[1]);
+      
+      console.warn('\nDuplicate slugs:');
+      duplicates.slice(0, 5).forEach(([slug, count]) => {
+        console.warn(`  - ${slug}: appears ${count} times`);
+      });
+    }
+    
     if (format === 'csv') {
       await this.saveAsCSV(results);
     } else if (format === 'json') {

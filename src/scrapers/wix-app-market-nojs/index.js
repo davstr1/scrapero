@@ -110,6 +110,15 @@ async function discoverCommand(options) {
   console.log(`Total unique apps found: ${allApps.length}`);
   console.log(`- From sitemap: ${sitemapApps.length}`);
   console.log(`- From categories: ${urls.apps.length - sitemapApps.length}`);
+  
+  // Log duplicate statistics
+  const totalDiscovered = sitemapApps.length + urls.apps.length;
+  const duplicatesRemoved = totalDiscovered - allApps.length;
+  console.log(`\nDuplicate Statistics:`);
+  console.log(`- Total apps before deduplication: ${totalDiscovered}`);
+  console.log(`- Duplicates removed: ${duplicatesRemoved}`);
+  console.log(`- Deduplication rate: ${(duplicatesRemoved / totalDiscovered * 100).toFixed(1)}%`);
+  
   console.log('\nDiscovery complete!');
 }
 
