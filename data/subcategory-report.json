@@ -1,0 +1,525 @@
+{
+  "summary": {
+    "totalApps": 1500,
+    "appsWithSubcategories": 1480,
+    "percentageWithSubcategories": "98.7",
+    "totalSubcategoriesFound": 1552,
+    "uniqueSubcategoryTypes": 46
+  },
+  "subcategories": {
+    "ecommerce/online-courses": {
+      "id": "online-courses",
+      "displayName": "Online Courses",
+      "parentCategory": "ecommerce",
+      "count": 5,
+      "examples": [
+        "Wix Online Programs",
+        "Wix Online Programs",
+        "Wix Online Programs"
+      ]
+    },
+    "ecommerce/dropship": {
+      "id": "dropship",
+      "displayName": "Dropshipping",
+      "parentCategory": "ecommerce",
+      "count": 28,
+      "examples": [
+        "Spocket - US & EU Dropshipping",
+        "Dropshipping AliExpress-DSers",
+        "Spocket - US & EU Dropshipping"
+      ]
+    },
+    "ecommerce/accounting": {
+      "id": "accounting",
+      "displayName": "Accounting",
+      "parentCategory": "ecommerce",
+      "count": 44,
+      "examples": [
+        "QuickBooks Connector",
+        "QuickBooks Connector",
+        "QuickBooks Connector"
+      ]
+    },
+    "ecommerce/stores": {
+      "id": "stores",
+      "displayName": "Stores",
+      "parentCategory": "ecommerce",
+      "count": 123,
+      "examples": [
+        "Wix Stores",
+        "Wix AI Site Chat",
+        "Easy Volume Discount Upsells"
+      ]
+    },
+    "booking--events/events": {
+      "id": "events",
+      "displayName": "Events",
+      "parentCategory": "booking--events",
+      "count": 15,
+      "examples": [
+        "Wix Events & Tickets",
+        "Calendar",
+        "Google Event Calendar"
+      ]
+    },
+    "marketing/email": {
+      "id": "email",
+      "displayName": "Email",
+      "parentCategory": "marketing",
+      "count": 64,
+      "examples": [
+        "Klaviyo",
+        "Omnisend Email Marketing & SMS",
+        "Klaviyo"
+      ]
+    },
+    "communication/chat": {
+      "id": "chat",
+      "displayName": "Chat",
+      "parentCategory": "communication",
+      "count": 29,
+      "examples": [
+        "Wix AI Site Chat",
+        "Wix Chat",
+        "WhatsApp Chat - Contact Us"
+      ]
+    },
+    "design-elements/search": {
+      "id": "search",
+      "displayName": "Search",
+      "parentCategory": "design-elements",
+      "count": 5,
+      "examples": [
+        "Wix AI Site Chat",
+        "Wix AI Site Chat",
+        "Wix AI Site Chat"
+      ]
+    },
+    "marketing/ads": {
+      "id": "ads",
+      "displayName": "Ads",
+      "parentCategory": "marketing",
+      "count": 85,
+      "examples": [
+        "Google Ads & Google Shopping",
+        "Google Ads for Wix (Official)",
+        "Kliken: Google Listings & Ads"
+      ]
+    },
+    "ecommerce/sell-buttons": {
+      "id": "sell-buttons",
+      "displayName": "Sell Buttons",
+      "parentCategory": "ecommerce",
+      "count": 41,
+      "examples": [
+        "Pay Button",
+        "Pay Button",
+        "Pay Button"
+      ]
+    },
+    "marketing/conversion": {
+      "id": "conversion",
+      "displayName": "Conversion",
+      "parentCategory": "marketing",
+      "count": 165,
+      "examples": [
+        "Easy Volume Discount Upsells",
+        "ReConvert Upsell & Cross Sell",
+        "WhatsApp Marketing"
+      ]
+    },
+    "media--content/music": {
+      "id": "music",
+      "displayName": "Music",
+      "parentCategory": "media--content",
+      "count": 5,
+      "examples": [
+        "Wix Music",
+        "Wix Music",
+        "Wix Music"
+      ]
+    },
+    "marketing/engagement": {
+      "id": "engagement",
+      "displayName": "Engagement",
+      "parentCategory": "marketing",
+      "count": 81,
+      "examples": [
+        "Quizell Product Quiz & Form",
+        "Quizell Product Quiz & Form",
+        "Message Bar Smartarget"
+      ]
+    },
+    "ecommerce/coupons--loyalty": {
+      "id": "coupons--loyalty",
+      "displayName": "Coupons & Loyalty",
+      "parentCategory": "ecommerce",
+      "count": 42,
+      "examples": [
+        "Unlimited spin to win",
+        "Wix Loyalty Program",
+        "Wix Referral Program"
+      ]
+    },
+    "booking--events/bookings": {
+      "id": "bookings",
+      "displayName": "Bookings",
+      "parentCategory": "booking--events",
+      "count": 10,
+      "examples": [
+        "Wix Bookings",
+        "Connecteam",
+        "Wix Bookings"
+      ]
+    },
+    "ecommerce/print-on-demand": {
+      "id": "print-on-demand",
+      "displayName": "Print on Demand",
+      "parentCategory": "ecommerce",
+      "count": 34,
+      "examples": [
+        "Printful: Print on Demand",
+        "Printful: Print on Demand",
+        "Printful: Print on Demand"
+      ]
+    },
+    "media--content/gallery": {
+      "id": "gallery",
+      "displayName": "Gallery",
+      "parentCategory": "media--content",
+      "count": 10,
+      "examples": [
+        "Wix Pro Gallery",
+        "Impressive Slideshow Gallery",
+        "Wix Pro Gallery"
+      ]
+    },
+    "ecommerce/shipping--delivery": {
+      "id": "shipping--delivery",
+      "displayName": "Shipping & Delivery",
+      "parentCategory": "ecommerce",
+      "count": 90,
+      "examples": [
+        "Worry-Free Delivery",
+        "Shippo - Scalable Shipping",
+        "Envia Shipping Solution"
+      ]
+    },
+    "communication/community": {
+      "id": "community",
+      "displayName": "Community",
+      "parentCategory": "communication",
+      "count": 5,
+      "examples": [
+        "Wix Groups",
+        "Wix Groups",
+        "Wix Groups"
+      ]
+    },
+    "communication/reviews--testimonials": {
+      "id": "reviews--testimonials",
+      "displayName": "Reviews & Testimonials",
+      "parentCategory": "communication",
+      "count": 15,
+      "examples": [
+        "Fera Reviews",
+        "Wix Reviews",
+        "Testimonials"
+      ]
+    },
+    "communication/comments": {
+      "id": "comments",
+      "displayName": "Comments",
+      "parentCategory": "communication",
+      "count": 5,
+      "examples": [
+        "Comments",
+        "Comments",
+        "Comments"
+      ]
+    },
+    "media--content/video": {
+      "id": "video",
+      "displayName": "Video",
+      "parentCategory": "media--content",
+      "count": 10,
+      "examples": [
+        "Impressive Slideshow Gallery",
+        "Wix Video",
+        "Impressive Slideshow Gallery"
+      ]
+    },
+    "media--content/photography": {
+      "id": "photography",
+      "displayName": "Photography",
+      "parentCategory": "media--content",
+      "count": 15,
+      "examples": [
+        "Impressive Slideshow Gallery",
+        "Right Click Protect",
+        "Virtual Tours"
+      ]
+    },
+    "design-elements/page-templates": {
+      "id": "page-templates",
+      "displayName": "Page Templates",
+      "parentCategory": "design-elements",
+      "count": 10,
+      "examples": [
+        "Impressive Slideshow Gallery",
+        "Wix FAQ",
+        "Impressive Slideshow Gallery"
+      ]
+    },
+    "marketing/social": {
+      "id": "social",
+      "displayName": "Social",
+      "parentCategory": "marketing",
+      "count": 193,
+      "examples": [
+        "Social Media Stream",
+        "Social Media Feed",
+        "Social Media Icons"
+      ]
+    },
+    "booking--events/real-estate": {
+      "id": "real-estate",
+      "displayName": "Real Estate",
+      "parentCategory": "booking--events",
+      "count": 5,
+      "examples": [
+        "iHomefinder Real Estate",
+        "iHomefinder Real Estate",
+        "iHomefinder Real Estate"
+      ]
+    },
+    "communication/blogs": {
+      "id": "blogs",
+      "displayName": "Blog",
+      "parentCategory": "communication",
+      "count": 5,
+      "examples": [
+        "Wix Blog",
+        "Wix Blog",
+        "Wix Blog"
+      ]
+    },
+    "communication/forms": {
+      "id": "forms",
+      "displayName": "Forms",
+      "parentCategory": "communication",
+      "count": 28,
+      "examples": [
+        "Contact Form by POWR",
+        "Wix Forms",
+        "Forms"
+      ]
+    },
+    "marketing/site-listings": {
+      "id": "site-listings",
+      "displayName": "Site Listings",
+      "parentCategory": "marketing",
+      "count": 25,
+      "examples": [
+        "Get Found Today",
+        "Get Found Today",
+        "UpAI: Better Domain Rating"
+      ]
+    },
+    "marketing/seo": {
+      "id": "seo",
+      "displayName": "SEO",
+      "parentCategory": "marketing",
+      "count": 100,
+      "examples": [
+        "Lumar for SEO",
+        "Lumar for SEO",
+        "Rabbit SEO Traffic Booster"
+      ]
+    },
+    "communication/crm": {
+      "id": "crm",
+      "displayName": "CRM",
+      "parentCategory": "communication",
+      "count": 5,
+      "examples": [
+        "Wix Members Area",
+        "Wix Members Area",
+        "Wix Members Area"
+      ]
+    },
+    "booking--events/restaurants": {
+      "id": "restaurants",
+      "displayName": "Restaurants",
+      "parentCategory": "booking--events",
+      "count": 22,
+      "examples": [
+        "Wix Table Reservations",
+        "Wix Restaurants Orders (New)",
+        "Wix Table Reservations"
+      ]
+    },
+    "ecommerce/food-beverage": {
+      "id": "food-beverage",
+      "displayName": "Food & Beverage",
+      "parentCategory": "ecommerce",
+      "count": 22,
+      "examples": [
+        "Wix Table Reservations",
+        "Wix Restaurants Orders (New)",
+        "Wix Table Reservations"
+      ]
+    },
+    "ecommerce/crowdfunding": {
+      "id": "crowdfunding",
+      "displayName": "Crowdfunding",
+      "parentCategory": "ecommerce",
+      "count": 11,
+      "examples": [
+        "Wix Donations",
+        "Wix Donations",
+        "Wix Donations"
+      ]
+    },
+    "design-elements/buttons--menus": {
+      "id": "buttons--menus",
+      "displayName": "Buttons & Menus",
+      "parentCategory": "design-elements",
+      "count": 5,
+      "examples": [
+        "Impressive Site Menu",
+        "Impressive Site Menu",
+        "Impressive Site Menu"
+      ]
+    },
+    "ecommerce/pricing--subscription": {
+      "id": "pricing--subscription",
+      "displayName": "Pricing & Subscription",
+      "parentCategory": "ecommerce",
+      "count": 19,
+      "examples": [
+        "Wix Pricing Plans",
+        "Wix Pricing Plans",
+        "Wix Pricing Plans"
+      ]
+    },
+    "media--content/content-services": {
+      "id": "content-services",
+      "displayName": "Content Services",
+      "parentCategory": "media--content",
+      "count": 5,
+      "examples": [
+        "Wix Multilingual",
+        "Wix Multilingual",
+        "Wix Multilingual"
+      ]
+    },
+    "media--content/file-sharing": {
+      "id": "file-sharing",
+      "displayName": "File Sharing",
+      "parentCategory": "media--content",
+      "count": 10,
+      "examples": [
+        "Wix File Share",
+        "Google Drive",
+        "Wix File Share"
+      ]
+    },
+    "design-elements/clock": {
+      "id": "clock",
+      "displayName": "Clock",
+      "parentCategory": "design-elements",
+      "count": 8,
+      "examples": [
+        "Urgency Countdown Timer",
+        "Urgency Countdown Timer",
+        "Urgency Countdown Timer"
+      ]
+    },
+    "media--content/podcasts": {
+      "id": "podcasts",
+      "displayName": "Podcasts",
+      "parentCategory": "media--content",
+      "count": 5,
+      "examples": [
+        "Wix Podcast Player",
+        "Wix Podcast Player",
+        "Wix Podcast Player"
+      ]
+    },
+    "design-elements/charts--tables": {
+      "id": "charts--tables",
+      "displayName": "Charts & Tables",
+      "parentCategory": "design-elements",
+      "count": 5,
+      "examples": [
+        "Table Master",
+        "Table Master",
+        "Table Master"
+      ]
+    },
+    "marketing/analytics": {
+      "id": "analytics",
+      "displayName": "Analytics",
+      "parentCategory": "marketing",
+      "count": 100,
+      "examples": [
+        "TWIPLA Website Intelligence",
+        "StoreMetrics",
+        "WEB-STAT"
+      ]
+    },
+    "booking--events/hotels": {
+      "id": "hotels",
+      "displayName": "Hotels",
+      "parentCategory": "booking--events",
+      "count": 10,
+      "examples": [
+        "Wix Hotels",
+        "Hotels & Airbnbs Map",
+        "Wix Hotels"
+      ]
+    },
+    "marketing/mobile": {
+      "id": "mobile",
+      "displayName": "Mobile",
+      "parentCategory": "marketing",
+      "count": 20,
+      "examples": [
+        "Instant Mobile App",
+        "My Mobile App",
+        "Mobilizei"
+      ]
+    },
+    "design-elements/banners--badges": {
+      "id": "banners--badges",
+      "displayName": "Banners & Badges",
+      "parentCategory": "design-elements",
+      "count": 9,
+      "examples": [
+        "Online Business Card",
+        "Online Business Card",
+        "Adblocker Detector"
+      ]
+    },
+    "ecommerce/warehousing-solutions": {
+      "id": "warehousing-solutions",
+      "displayName": "Warehousing Solutions",
+      "parentCategory": "ecommerce",
+      "count": 4,
+      "examples": [
+        "eHouse App",
+        "Bigblue ‑ All in one logistics",
+        "eHouse App"
+      ]
+    }
+  },
+  "parentCategories": {
+    "ecommerce": 463,
+    "booking--events": 62,
+    "marketing": 833,
+    "communication": 92,
+    "design-elements": 42,
+    "media--content": 60
+  }
+}
