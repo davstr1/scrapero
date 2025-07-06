@@ -1,0 +1,38 @@
+{
+  "slug": "visitor-analytics",
+  "url": "https://www.wix.com/app-market/web-solution/visitor-analytics",
+  "name": "TWIPLA Website Intelligence",
+  "rating": 1,
+  "reviewCount": 61600,
+  "installs": "",
+  "developer": "TWIPLA",
+  "description": "See conversion blockers, painpoints, site issues",
+  "features": [],
+  "hasFreeVersion": true,
+  "tiers": [
+    {
+      "currency": "€",
+      "amount": 236,
+      "period": "month"
+    },
+    {
+      "currency": "€",
+      "amount": 749,
+      "period": "month"
+    },
+    {
+      "currency": "€",
+      "amount": 1494,
+      "period": "month"
+    }
+  ],
+  "icon": "https://static.wixstatic.com/media/d44ad1_bf164e9296a5466aafbcd548a01d7efe~mv2.jpg/v1/fill/d44ad1_bf164e9296a5466aafbcd548a01d7efe~mv2.jpg",
+  "screenshots": [],
+  "tags": [
+    "Yearly",
+    "Monthly"
+  ],
+  "lastUpdated": "",
+  "scrapedAt": "2025-07-06T19:30:56.333Z",
+  "supportEmail": "support@twipla.com"
+}
