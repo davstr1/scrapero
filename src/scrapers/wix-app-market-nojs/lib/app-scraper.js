@@ -101,6 +101,9 @@ class AppScraper {
       tags: Extractors.extractTags($),
       lastUpdated: Extractors.extractLastUpdated($),
       
+      // Subcategories
+      subcategories: Extractors.extractSubcategories($),
+      
       // Scraping metadata
       scrapedAt: Utils.getTimestamp()
     };

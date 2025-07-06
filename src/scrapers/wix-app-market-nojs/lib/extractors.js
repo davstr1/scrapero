@@ -392,6 +392,70 @@ class Extractors {
 
     return '';
   }
+
+  static extractSubcategories($) {
+    const subcategories = [];
+    
+    try {
+      // Primary selector: data-hook attribute
+      const subcategoryElements = $('[data-hook^="subcategory-tag-button-"]');
+      
+      if (subcategoryElements.length > 0) {
+        subcategoryElements.each((i, el) => {
+          const $el = $(el);
+          const dataHook = $el.attr('data-hook') || '';
+          const href = $el.attr('href') || '';
+          const displayName = $el.find('.wds_1_182_0_ButtonCore__content, span').first().text().trim();
+          
+          // Extract subcategory ID from data-hook
+          const subcategoryId = dataHook.replace('subcategory-tag-button-', '');
+          
+          // Extract parent category from URL
+          const urlMatch = href.match(/\/category\/([^\/]+)(?:\/[^\/]+)?/);
+          const parentCategory = urlMatch ? urlMatch[1] : '';
+          
+          if (subcategoryId && displayName) {
+            subcategories.push({
+              id: subcategoryId,
+              displayName: displayName,
+              parentCategory: parentCategory,
+              url: href
+            });
+          }
+        });
+      } else {
+        // Fallback selector: links with subCat parameter
+        const fallbackElements = $('[data-hook="categories-tags"] a[href*="subCat="]');
+        
+        fallbackElements.each((i, el) => {
+          const $el = $(el);
+          const href = $el.attr('href') || '';
+          const displayName = $el.text().trim();
+          
+          // Extract subcategory from URL parameter
+          const subCatMatch = href.match(/subCat=([^&]+)/);
+          const subcategoryId = subCatMatch ? subCatMatch[1] : '';
+          
+          // Extract parent category from URL path
+          const urlMatch = href.match(/\/category\/([^\/]+)/);
+          const parentCategory = urlMatch ? urlMatch[1] : '';
+          
+          if (subcategoryId && displayName) {
+            subcategories.push({
+              id: subcategoryId,
+              displayName: displayName,
+              parentCategory: parentCategory,
+              url: href
+            });
+          }
+        });
+      }
+    } catch (error) {
+      console.warn('Error extracting subcategories:', error.message);
+    }
+    
+    return subcategories;
+  }
 }
 
 module.exports = Extractors;
