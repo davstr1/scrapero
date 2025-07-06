@@ -81,7 +81,9 @@ CSV output includes:
 - name: App display name
 - url: App page URL
 - category: Main category (keyword-based detection)
+- additionalCategories: Other categories where the app appears (semicolon-separated)
 - subcategories: Semicolon-separated list of subcategories (format: "id:displayName")
+- allSubcategories: All subcategories from all category appearances
 - rating: Average rating (0-5)
 - reviewCount: Number of reviews
 - installs: Installation count (if available)
@@ -115,6 +117,22 @@ In JSON, subcategories are structured as:
 3. **Reliability**: No browser crashes or memory leaks
 4. **Simplicity**: Plain HTTP requests with cheerio parsing
 5. **Scalability**: Can run many concurrent requests
+
+## Deduplication
+
+The scraper implements robust deduplication to handle apps that appear in multiple categories:
+
+- **Automatic Deduplication**: Apps are tracked by their unique slug
+- **Category Merging**: When an app appears in multiple categories, all categories are preserved
+- **Logging**: Duplicate statistics are logged during discovery and before saving
+- **Validation**: Built-in duplicate detection warns if any duplicates slip through
+
+### Deduplication Process
+
+1. Apps discovered from sitemap are added first
+2. Apps from category pages are merged, preserving additional category data
+3. Final output contains exactly one entry per unique app slug
+4. All category and subcategory associations are preserved
 
 ## Limitations
 
