@@ -203,7 +203,9 @@ class AppScraper {
         { id: 'name', title: 'Name' },
         { id: 'url', title: 'URL' },
         { id: 'category', title: 'Category' },
+        { id: 'additionalCategories', title: 'Additional Categories' },
         { id: 'subcategories', title: 'Subcategories' },
+        { id: 'allSubcategories', title: 'All Subcategories' },
         { id: 'rating', title: 'Rating' },
         { id: 'reviewCount', title: 'Reviews' },
         { id: 'installs', title: 'Installs' },
@@ -223,7 +225,9 @@ class AppScraper {
       screenshots: app.screenshots ? app.screenshots.join('; ') : '',
       tags: app.tags ? app.tags.join(', ') : '',
       tiers: app.tiers ? JSON.stringify(app.tiers) : '',
-      subcategories: app.subcategories ? app.subcategories.map(sc => `${sc.id}:${sc.displayName}`).join('; ') : ''
+      subcategories: app.subcategories ? app.subcategories.map(sc => `${sc.id}:${sc.displayName}`).join('; ') : '',
+      additionalCategories: app.additionalCategories ? app.additionalCategories.join('; ') : '',
+      allSubcategories: app.allSubcategories ? app.allSubcategories.map(sc => `${sc.id}:${sc.displayName}`).join('; ') : ''
     }));
     
     await csvWriter.writeRecords(flattenedData);
