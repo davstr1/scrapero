@@ -452,6 +452,9 @@ class Extractors {
       }
     } catch (error) {
       console.warn('Error extracting subcategories:', error.message);
+      if (process.env.DEBUG) {
+        console.error('Subcategory extraction error details:', error);
+      }
     }
     
     return subcategories;

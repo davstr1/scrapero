@@ -32,6 +32,7 @@ Successfully extracts:
 - App icon URL
 - Support email
 - Tags
+- **Subcategories** (NEW): Extracts subcategory information including ID, display name, and parent category
 
 ## Usage
 
@@ -79,7 +80,8 @@ CSV output includes:
 - slug: App identifier
 - name: App display name
 - url: App page URL
-- category: Main category
+- category: Main category (keyword-based detection)
+- subcategories: Semicolon-separated list of subcategories (format: "id:displayName")
 - rating: Average rating (0-5)
 - reviewCount: Number of reviews
 - installs: Installation count (if available)
@@ -89,6 +91,22 @@ CSV output includes:
 - icon: Icon URL
 - lastUpdated: Last update date
 - scrapedAt: Scraping timestamp
+
+### Subcategory Format
+
+In CSV, subcategories are formatted as: `accounting:Contabilidad; payments:Payments`
+
+In JSON, subcategories are structured as:
+```json
+"subcategories": [
+  {
+    "id": "accounting",
+    "displayName": "Contabilidad",
+    "parentCategory": "ecommerce",
+    "url": "https://es.wix.com/app-market/category/ecommerce/accounting?subCat=accounting"
+  }
+]
+```
 
 ## Advantages Over Puppeteer Version
 
