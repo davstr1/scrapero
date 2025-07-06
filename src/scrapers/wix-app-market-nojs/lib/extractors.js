@@ -27,15 +27,16 @@ class Extractors {
   }
 
   static extractRating($) {
-    // Look for rating patterns in text
+    const bodyText = $('body').text().replace(/\s+/g, ' ').trim();
+    
+    // Look for rating patterns - specifically the concatenated pattern like "4.61600 reviews"
     const patterns = [
+      /(\d\.\d)(\d+)\s*reviews?/i,  // Matches "4.61600 reviews"
       /(\d+\.?\d*)\s*out of 5/i,
       /(\d+\.?\d*)\s*\/\s*5/,
       /rating[:\s]+(\d+\.?\d*)/i,
       /(\d+\.?\d*)\s*stars?/i
     ];
-
-    const bodyText = $('body').text();
     
     for (const pattern of patterns) {
       const match = bodyText.match(pattern);
@@ -62,25 +63,22 @@ class Extractors {
   }
 
   static extractReviewCount($) {
+    const bodyText = $('body').text().replace(/\s+/g, ' ').trim();
+    
+    // Special pattern for Wix's concatenated format "4.61600 reviews"
+    const concatenatedMatch = bodyText.match(/\d\.\d(\d+)\s*reviews?/i);
+    if (concatenatedMatch) {
+      return parseInt(concatenatedMatch[1]);
+    }
+    
+    // Standard patterns
     const patterns = [
       /(\d+[,\d]*)\s*reviews?/i,
       /(\d+[,\d]*)\s*ratings?/i,
       /based on\s*(\d+[,\d]*)/i,
       /\((\d+[,\d]*)\)/
     ];
-
-    // Look near rating information
-    const ratingArea = $('*:contains("out of 5"), *:contains("rating")').first().parent().text();
     
-    for (const pattern of patterns) {
-      const match = ratingArea.match(pattern);
-      if (match) {
-        return parseInt(match[1].replace(/,/g, ''));
-      }
-    }
-
-    // Fallback to full page search
-    const bodyText = $('body').text();
     for (const pattern of patterns) {
       const match = bodyText.match(pattern);
       if (match) {
@@ -116,21 +114,22 @@ class Extractors {
   }
 
   static extractDeveloper($) {
-    // Look for developer patterns
+    const bodyText = $('body').text().replace(/\s+/g, ' ').trim();
+    
+    // Look for developer patterns - Wix specific pattern "By DEVELOPER Free plan available"
     const patterns = [
+      /By\s+([^F]+?)\s*(?:Free|Premium|from)/i,  // Wix pattern
       /(?:by|from|developed by|created by)\s+([^,\n]+?)(?:\s*free|\s*\$|\s*€|\s*-|\s*\|)/i,
       /developer[:\s]+([^,\n]+)/i,
       /provided by\s+([^,\n]+)/i
     ];
-
-    const bodyText = $('body').text();
     
     for (const pattern of patterns) {
       const match = bodyText.match(pattern);
       if (match) {
         const developer = match[1].trim();
         // Exclude common false positives
-        if (!developer.match(/^(the|this|our|free|premium|pro)$/i)) {
+        if (!developer.match(/^(the|this|our|free|premium|pro)$/i) && developer.length > 1) {
           return developer;
         }
       }
@@ -202,31 +201,28 @@ class Extractors {
       return Utils.cleanText(metaDesc);
     }
 
-    // Look for description patterns
-    const selectors = [
-      'p:contains("is a"):first',
-      'p:contains("helps"):first',
-      'p:contains("allows"):first',
-      'p:contains("enables"):first',
-      'section p:first',
-      'main p:first'
-    ];
-
-    for (const selector of selectors) {
-      const text = $(selector).text().trim();
-      if (text && text.length > 50 && text.length < 500) {
-        return Utils.cleanText(text);
+    const bodyText = $('body').text().replace(/\s+/g, ' ').trim();
+    
+    // Look for Wix-specific description pattern after developer name
+    const devMatch = bodyText.match(/By\s+[^F]+?\s*(?:Free|Premium).*?([A-Z][^.!?]+(?:[.!?]|$))/);
+    if (devMatch && devMatch[1]) {
+      const desc = devMatch[1].trim();
+      if (desc.length > 10 && desc.length < 500) {
+        return desc;
       }
     }
+    
+    // Look for description patterns
+    const patterns = [
+      /(?:See|View|Track|Monitor|Analyze|Create|Build|Manage)\s+[^.!?]+[.!?]/i,
+      /(?:is a|helps|allows|enables)\s+[^.!?]+[.!?]/i
+    ];
 
-    // Get first substantial paragraph
-    const paragraphs = $('p').filter((i, el) => {
-      const text = $(el).text().trim();
-      return text.length > 50 && text.length < 500;
-    });
-
-    if (paragraphs.length) {
-      return Utils.cleanText(paragraphs.first().text());
+    for (const pattern of patterns) {
+      const match = bodyText.match(pattern);
+      if (match && match[0].length > 20 && match[0].length < 500) {
+        return Utils.cleanText(match[0]);
+      }
     }
 
     return '';
