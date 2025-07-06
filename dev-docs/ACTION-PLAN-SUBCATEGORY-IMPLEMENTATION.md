@@ -18,16 +18,16 @@
 ## Phase 2: Design and Planning
 
 ### 2.1 Design Subcategory Data Model
-- [ ] Define subcategory object structure (id, displayName, parentCategory, url)
-- [ ] Decide where to store subcategories in the app object
-- [ ] Plan relationship mapping between categories and subcategories
-- [ ] Document the new data model structure
+- [x] Define subcategory object structure (id, displayName, parentCategory, url)
+- [x] Decide where to store subcategories in the app object
+- [x] Plan relationship mapping between categories and subcategories
+- [x] Document the new data model structure
 
 ### 2.2 Plan Selector Strategy
-- [ ] Write the primary CSS selector for subcategories
-- [ ] Write the fallback selector using URL patterns
-- [ ] Plan how to differentiate between category and subcategory buttons
-- [ ] Document edge cases for selector logic
+- [x] Write the primary CSS selector for subcategories
+- [x] Write the fallback selector using URL patterns
+- [x] Plan how to differentiate between category and subcategory buttons
+- [x] Document edge cases for selector logic
 
 ## Phase 3: Implementation
 
