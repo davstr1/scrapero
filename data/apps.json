@@ -1,0 +1,135 @@
+{
+  "timestamp": "2025-07-06T21:43:47.809Z",
+  "count": 3,
+  "apps": [
+    {
+      "slug": "google-ads-shopping",
+      "url": "https://www.wix.com/app-market/web-solution/google-ads-shopping",
+      "name": "Google Ads & Google Shopping",
+      "category": "Marketing",
+      "rating": 3.3,
+      "reviewCount": 119,
+      "installs": "",
+      "developer": "StoreYa",
+      "description": "We'll drive targeted visitors to your site!",
+      "features": [],
+      "hasFreeVersion": true,
+      "tiers": [
+        {
+          "currency": "€",
+          "amount": 39.99,
+          "period": "month"
+        },
+        {
+          "currency": "€",
+          "amount": 3999,
+          "period": "month"
+        },
+        {
+          "currency": "€",
+          "amount": 14999,
+          "period": "month"
+        },
+        {
+          "currency": "€",
+          "amount": 49999,
+          "period": "month"
+        }
+      ],
+      "icon": "https://static.wixstatic.com/media/327c76_d381c6622ac84fb99f9dc02c389467b1~mv2.png/v1/fill/327c76_d381c6622ac84fb99f9dc02c389467b1~mv2.png",
+      "screenshots": [],
+      "tags": [],
+      "lastUpdated": "",
+      "subcategories": [
+        {
+          "id": "ads",
+          "displayName": "Ads",
+          "parentCategory": "marketing",
+          "url": "https://www.wix.com/app-market/category/marketing/ads?subCat=ads"
+        }
+      ],
+      "scrapedAt": "2025-07-06T21:43:47.088Z",
+      "supportEmail": "support@storeya.com"
+    },
+    {
+      "slug": "quickbooks-online",
+      "url": "https://es.wix.com/app-market/web-solution/quickbooks-online",
+      "name": "QuickBooks Connector",
+      "category": "Business Services",
+      "rating": 4,
+      "reviewCount": 10,
+      "installs": "",
+      "developer": "using this QuickBooks Connector app to start syncing sales",
+      "description": "Integrate QuickBooks Online to your site",
+      "features": [],
+      "hasFreeVersion": false,
+      "tiers": [
+        {
+          "currency": "$",
+          "amount": 3.5,
+          "period": "month"
+        },
+        {
+          "currency": "$",
+          "amount": 6.5,
+          "period": "month"
+        },
+        {
+          "currency": "$",
+          "amount": 9.9,
+          "period": "month"
+        },
+        {
+          "currency": "$",
+          "amount": 23.5,
+          "period": "month"
+        }
+      ],
+      "icon": "https://static.wixstatic.com/media/9955e5_5daaec99a1d0466d838d6e3a363b73fc~mv2.png/v1/fill/9955e5_5daaec99a1d0466d838d6e3a363b73fc~mv2.png",
+      "screenshots": [],
+      "tags": [],
+      "lastUpdated": "",
+      "subcategories": [
+        {
+          "id": "accounting",
+          "displayName": "Contabilidad",
+          "parentCategory": "ecommerce",
+          "url": "https://es.wix.com/app-market/category/ecommerce/accounting?subCat=accounting"
+        }
+      ],
+      "scrapedAt": "2025-07-06T21:43:47.653Z",
+      "supportEmail": "support@onesaas.comIMPORTANT"
+    },
+    {
+      "slug": "mailchimp",
+      "url": "https://www.wix.com/app-market/web-solution/mailchimp",
+      "name": "Mailchimp",
+      "category": "Design & Content",
+      "rating": 3.7,
+      "reviewCount": 51,
+      "installs": "",
+      "developer": "Intuit Mailchimp",
+      "description": "Boost traffic with email, SMS, and automation",
+      "features": [],
+      "hasFreeVersion": true,
+      "tiers": [],
+      "icon": "https://static.wixstatic.com/media/da8db3_3a8cf0e531a34290a9f98dadb611180b~mv2.png/v1/fill/da8db3_3a8cf0e531a34290a9f98dadb611180b~mv2.png",
+      "screenshots": [],
+      "tags": [
+        "Yearly",
+        "Monthly"
+      ],
+      "lastUpdated": "",
+      "subcategories": [
+        {
+          "id": "email",
+          "displayName": "Email",
+          "parentCategory": "marketing",
+          "url": "https://www.wix.com/app-market/category/marketing/email?subCat=email"
+        }
+      ],
+      "scrapedAt": "2025-07-06T21:43:47.784Z",
+      "supportEmail": "mc-integrationsupport@intuit.com"
+    }
+  ]
+}
