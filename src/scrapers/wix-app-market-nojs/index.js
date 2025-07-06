@@ -10,6 +10,21 @@ const config = require('./config.json');
 async function discoverCommand(options) {
   console.log('=== Wix App Market URL Discovery ===\n');
   
+  // Step 1: Try sitemap first (fastest method)
+  console.log('Step 1: Checking sitemap for app URLs...');
+  const SitemapParser = require('./lib/sitemap-parser');
+  const sitemapParser = new SitemapParser();
+  
+  let sitemapApps = [];
+  try {
+    sitemapApps = await sitemapParser.getAppUrls();
+    console.log(`✓ Found ${sitemapApps.length} apps in sitemap!`);
+  } catch (error) {
+    console.error('Error parsing sitemap:', error.message);
+  }
+  
+  // Step 2: Category discovery with pagination
+  console.log('\nStep 2: Discovering apps through categories...');
   const discovery = new UrlDiscovery();
   
   // Check if we should resume
@@ -17,18 +32,44 @@ async function discoverCommand(options) {
     const existing = await discovery.loadExistingUrls();
     if (existing) {
       console.log('Resuming from existing URL data...\n');
-      return;
     }
   }
   
   // Discover all URLs
   const urls = await discovery.discoverAll();
   
+  // Step 3: Merge results
+  console.log('\nStep 3: Merging discovery results...');
+  
+  // Combine sitemap apps with discovered apps
+  const allApps = [...sitemapApps];
+  
+  // Add discovered apps that aren't in sitemap
+  for (const app of urls.apps) {
+    if (!allApps.some(a => a.slug === app.slug)) {
+      allApps.push(app);
+    }
+  }
+  
+  // Update the discovery results
+  urls.apps = allApps;
+  urls.discoveryMethods = {
+    sitemap: sitemapApps.length,
+    categories: urls.apps.length - sitemapApps.length
+  };
+  
+  // Save the complete results
+  await Utils.writeJsonFile(config.output.urlsFile, urls);
+  
   // Build and save category structure
   const categoryMapping = new CategoryMapping();
   const structure = await categoryMapping.buildCategoryStructure(urls);
   await categoryMapping.saveCategoryStructure(structure);
   
+  console.log('\n=== Discovery Summary ===');
+  console.log(`Total unique apps found: ${allApps.length}`);
+  console.log(`- From sitemap: ${sitemapApps.length}`);
+  console.log(`- From categories: ${urls.apps.length - sitemapApps.length}`);
   console.log('\nDiscovery complete!');
 }
 

@@ -1,4 +1,5 @@
 const Utils = require('./utils');
+const CategoryMapper = require('./category-mapper');
 
 class Extractors {
   static extractAppName($) {
@@ -93,21 +94,42 @@ class Extractors {
   }
 
   static extractInstalls($) {
+    const bodyText = $('body').text().replace(/\s+/g, ' ').trim();
+    
+    // Look for install patterns - Wix often shows this in various formats
     const patterns = [
       /(\d+[,\d]*\+?)\s*(?:active\s*)?install(?:s|ations)?/i,
-      /installed\s*on\s*(\d+[,\d]*\+?)/i,
+      /installed\s*on\s*(\d+[,\d]*\+?)\s*sites?/i,
       /(\d+[,\d]*\+?)\s*sites?\s*use/i,
       /used\s*by\s*(\d+[,\d]*\+?)/i,
-      /(\d+[,\d]*\+?)\s*users?/i
+      /(\d+[,\d]*\+?)\s*active\s*users?/i,
+      /(\d+(?:k|K|m|M)?)\s*downloads?/i,
+      /(\d+(?:k|K|m|M)?)\s*merchants?/i
     ];
-
-    const bodyText = $('body').text();
     
     for (const pattern of patterns) {
       const match = bodyText.match(pattern);
       if (match) {
-        return match[1];
+        let installs = match[1];
+        
+        // Convert k/m notation to full numbers
+        if (installs.match(/k$/i)) {
+          installs = installs.replace(/k$/i, '000');
+        } else if (installs.match(/m$/i)) {
+          installs = installs.replace(/m$/i, '000000');
+        }
+        
+        return installs;
       }
+    }
+    
+    // Sometimes it's in a data attribute or hidden in the page
+    const installAttr = $('[data-installs], [data-downloads], [data-users]').first().attr('data-installs') ||
+                       $('[data-installs], [data-downloads], [data-users]').first().attr('data-downloads') ||
+                       $('[data-installs], [data-downloads], [data-users]').first().attr('data-users');
+    
+    if (installAttr) {
+      return installAttr;
     }
 
     return '';

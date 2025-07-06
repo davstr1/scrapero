@@ -3,6 +3,7 @@ const pLimit = require('p-limit').default;
 const HttpClient = require('./http-client');
 const Extractors = require('./extractors');
 const Utils = require('./utils');
+const CategoryMapper = require('./category-mapper');
 const config = require('../config.json');
 
 class AppScraper {
@@ -73,7 +74,7 @@ class AppScraper {
       slug: appInfo.slug,
       url: appInfo.url,
       name: Extractors.extractAppName($) || appInfo.name,
-      category: appInfo.category,
+      category: '',
       
       // Ratings and reviews
       rating: Extractors.extractRating($),
@@ -109,6 +110,9 @@ class AppScraper {
     
     // Extract review breakdown if available
     this.extractReviewBreakdown($, appData);
+    
+    // Detect category based on app data
+    appData.category = CategoryMapper.detectCategory(appData);
     
     return appData;
   }

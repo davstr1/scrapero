@@ -210,8 +210,28 @@ class UrlDiscovery {
     for (const page of allPages) {
       console.log(`\nProcessing: ${page.name}`);
       
+      // Discover apps with pagination
+      await this.discoverAppsWithPagination(page);
+    }
+    
+    // Remove duplicate apps
+    this.discoveredUrls.apps = Utils.removeDuplicates(
+      this.discoveredUrls.apps,
+      app => app.slug
+    );
+  }
+
+  async discoverAppsWithPagination(page) {
+    let pageNum = 1;
+    let hasMorePages = true;
+    let totalAppsFound = 0;
+    
+    while (hasMorePages && pageNum <= 10) { // Limit to 10 pages for safety
       try {
-        const response = await this.httpClient.get(page.url);
+        // Try pagination with ?page parameter
+        const pageUrl = pageNum === 1 ? page.url : `${page.url}?page=${pageNum}`;
+        
+        const response = await this.httpClient.get(pageUrl);
         const $ = cheerio.load(response.data);
         
         const appLinks = new Set();
@@ -245,32 +265,35 @@ class UrlDiscovery {
                 name: appName || appSlug,
                 url: `${this.baseUrl}/web-solution/${appSlug}`,
                 category: page.parentCategory || page.slug,
-                discoveredFrom: page.url
+                discoveredFrom: pageUrl,
+                page: pageNum
               }));
             }
           }
         });
         
         const newApps = Array.from(appLinks).map(item => JSON.parse(item));
-        this.discoveredUrls.apps.push(...newApps);
+        const uniqueNewApps = newApps.filter(app => 
+          !this.discoveredUrls.apps.some(existing => existing.slug === app.slug)
+        );
         
-        console.log(`  Found ${newApps.length} apps`);
-        
-        // Limit apps per category if configured
-        if (config.scraping.maxAppsPerCategory && newApps.length >= config.scraping.maxAppsPerCategory) {
-          console.log(`  Reached max apps limit (${config.scraping.maxAppsPerCategory})`);
+        if (uniqueNewApps.length === 0) {
+          // No new apps found, stop pagination
+          hasMorePages = false;
+        } else {
+          this.discoveredUrls.apps.push(...uniqueNewApps);
+          totalAppsFound += uniqueNewApps.length;
+          console.log(`  Page ${pageNum}: Found ${uniqueNewApps.length} new apps`);
+          pageNum++;
         }
         
       } catch (error) {
-        console.error(`Error processing ${page.name}:`, error.message);
+        console.error(`Error processing page ${pageNum} of ${page.name}:`, error.message);
+        hasMorePages = false;
       }
     }
     
-    // Remove duplicate apps
-    this.discoveredUrls.apps = Utils.removeDuplicates(
-      this.discoveredUrls.apps,
-      app => app.slug
-    );
+    console.log(`  Total: ${totalAppsFound} apps found across ${pageNum - 1} pages`);
   }
 
   async loadExistingUrls() {
