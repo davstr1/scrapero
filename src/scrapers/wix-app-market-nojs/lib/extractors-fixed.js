@@ -30,14 +30,20 @@ class Extractors {
   static extractRating($) {
     const bodyText = $('body').text().replace(/\s+/g, ' ').trim();
     
+    // IMPORTANT: Check for "No Reviews" as a standalone phrase - if present, return 0
+    if (/\bno reviews?\b/i.test(bodyText)) {
+      return 0;
+    }
+    
     // Look for rating patterns - specifically the concatenated pattern like "4.61600 reviews"
     const patterns = [
       /(\d\.\d)(\d+)\s*reviews?/i,  // Matches "4.61600 reviews"
       /(\d+\.?\d*)\s*out of 5/i,
-      // Skip X/5 pattern as it often matches things like "1/5 Wouldn't recommend"
       /rating[:\s]+(\d+\.?\d*)/i,
       /(\d+\.?\d*)\s*stars?/i
     ];
+    
+    // SKIP the X/5 pattern as it often matches pagination like "1/5"
     
     for (const pattern of patterns) {
       const match = bodyText.match(pattern);
@@ -66,15 +72,23 @@ class Extractors {
   static extractReviewCount($) {
     const bodyText = $('body').text().replace(/\s+/g, ' ').trim();
     
+    // IMPORTANT: Check for "No Reviews" as a standalone phrase - if present, return 0
+    if (/\bno reviews?\b/i.test(bodyText)) {
+      return 0;
+    }
+    
     // Special pattern for Wix's concatenated format "4.61600 reviews"
     const concatenatedMatch = bodyText.match(/\d\.\d(\d+)\s*reviews?/i);
     if (concatenatedMatch) {
       return parseInt(concatenatedMatch[1]);
     }
     
-    // Standard patterns - but check context to avoid false positives
+    // Standard patterns - but exclude common false positives
     const patterns = [
-      /(\d+[,\d]*)\s*reviews?/i,
+      // Match review count but exclude dropdown options
+      /(\d+[,\d]*)\s*reviews?\s*(?:from|by|total)/i,
+      /has\s*(\d+[,\d]*)\s*reviews?/i,
+      /(\d+[,\d]*)\s*customer\s*reviews?/i,
       /(\d+[,\d]*)\s*ratings?/i,
       /based on\s*(\d+[,\d]*)/i,
       /\((\d+[,\d]*)\)\s*(?:reviews?|ratings?)/i
@@ -84,24 +98,19 @@ class Extractors {
       const match = bodyText.match(pattern);
       if (match) {
         const count = parseInt(match[1].replace(/,/g, ''));
-        if (count > 0 && count < 10000000) { // Sanity check
-          // Check context to avoid false positives like "Display 1000 reviews"
-          const fullMatch = match[0];
-          const index = bodyText.indexOf(fullMatch);
-          const contextBefore = bodyText.substring(Math.max(0, index - 40), index).toLowerCase();
-          const contextAfter = bodyText.substring(index, Math.min(bodyText.length, index + 40)).toLowerCase();
-          
-          // Skip if it's in a feature/pricing context
-          const skipPhrases = ['display', 'show', 'up to', 'limit', 'maximum', 'plan', 'import', 'feature', 'benefit'];
-          if (skipPhrases.some(phrase => contextBefore.includes(phrase) || contextAfter.includes(phrase))) {
-            continue;
+        // Sanity check - exclude suspiciously round numbers that might be dropdown options
+        if (count > 0 && count < 10000000) {
+          // If it's exactly 1000, 500, 250, 100, 50, etc., double-check it's not a dropdown
+          const suspiciousNumbers = [1000, 500, 250, 100, 50];
+          if (suspiciousNumbers.includes(count)) {
+            // Look for context around this number
+            const index = bodyText.indexOf(match[0]);
+            const context = bodyText.substring(Math.max(0, index - 30), Math.min(bodyText.length, index + 30));
+            // If it's in a dropdown context, skip it
+            if (/show|display|view|limit|per page/i.test(context)) {
+              continue;
+            }
           }
-          
-          // Additional check: if count is exactly 1000 and no rating was found, it's likely a false positive
-          if (count === 1000 && Extractors.extractRating($) === 0) {
-            continue;
-          }
-          
           return count;
         }
       }
