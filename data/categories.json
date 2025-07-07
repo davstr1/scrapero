@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-07-06T23:53:32.124Z",
+  "timestamp": "2025-07-07T01:22:53.579Z",
   "categories": [
     {
       "slug": "marketing",
@@ -133,7 +133,7 @@
           "appCount": 0
         }
       ],
-      "appCount": 4
+      "appCount": 3
     },
     {
       "slug": "ecommerce",
@@ -309,7 +309,7 @@
           "appCount": 0
         }
       ],
-      "appCount": 4
+      "appCount": 3
     },
     {
       "slug": "booking--events",
@@ -836,5 +836,5 @@
   ],
   "totalCategories": 62,
   "totalSubcategories": 56,
-  "totalApps": 1191
+  "totalApps": 1189
 }

@@ -4406,7 +4406,7 @@
       "lastmod": "2025-07-03T20:02:22+00:00",
       "discoveredFrom": [
         "sitemap",
-        "https://www.wix.com/app-market/category/ecommerce"
+        "https://www.wix.com/app-market/category/ecommerce/accounting"
       ],
       "additionalCategories": [
         "ecommerce"
@@ -6068,7 +6068,7 @@
       "lastmod": "2025-07-03T20:02:22+00:00",
       "discoveredFrom": [
         "sitemap",
-        "https://www.wix.com/app-market/category/ecommerce/accounting"
+        "https://www.wix.com/app-market/category/ecommerce"
       ],
       "additionalCategories": [
         "ecommerce"
@@ -6836,7 +6836,7 @@
       "lastmod": "2025-07-03T20:02:22+00:00",
       "discoveredFrom": [
         "sitemap",
-        "https://www.wix.com/app-market/category/ecommerce/food-beverage"
+        "https://www.wix.com/app-market/category/ecommerce/shipping--delivery"
       ],
       "additionalCategories": [
         "ecommerce"
@@ -7664,7 +7664,7 @@
       "lastmod": "2025-07-03T20:02:22+00:00",
       "discoveredFrom": [
         "sitemap",
-        "https://www.wix.com/app-market/category/media--content"
+        "https://www.wix.com/app-market/category/media--content/music"
       ],
       "additionalCategories": [
         "media--content"
@@ -8360,7 +8360,7 @@
       "lastmod": "2025-07-03T20:02:22+00:00",
       "discoveredFrom": [
         "sitemap",
-        "https://www.wix.com/app-market/category/media--content/music"
+        "https://www.wix.com/app-market/category/media--content"
       ],
       "additionalCategories": [
         "media--content"
@@ -14004,13 +14004,7 @@
       "slug": "expedia-reviews-widget",
       "url": "https://www.wix.com/app-market/web-solution/expedia-reviews-widget",
       "lastmod": "2025-07-03T20:02:22+00:00",
-      "discoveredFrom": [
-        "sitemap",
-        "https://www.wix.com/app-market/category/communication/reviews--testimonials"
-      ],
-      "additionalCategories": [
-        "communication"
-      ]
+      "discoveredFrom": "sitemap"
     },
     {
       "slug": "remarqz-ai-review",
@@ -14070,7 +14064,13 @@
       "slug": "yelp-reviews-59f64b82-8c42-4ad7-93a0-e85a13bf584c",
       "url": "https://www.wix.com/app-market/web-solution/yelp-reviews-59f64b82-8c42-4ad7-93a0-e85a13bf584c",
       "lastmod": "2025-07-03T20:02:22+00:00",
-      "discoveredFrom": "sitemap"
+      "discoveredFrom": [
+        "sitemap",
+        "https://www.wix.com/app-market/category/communication/reviews--testimonials"
+      ],
+      "additionalCategories": [
+        "communication"
+      ]
     },
     {
       "slug": "socialbugcrm",
@@ -14142,7 +14142,13 @@
       "slug": "pinterest-embed",
       "url": "https://www.wix.com/app-market/web-solution/pinterest-embed",
       "lastmod": "2025-07-03T20:02:22+00:00",
-      "discoveredFrom": "sitemap"
+      "discoveredFrom": [
+        "sitemap",
+        "https://www.wix.com/app-market/category/marketing/social"
+      ],
+      "additionalCategories": [
+        "marketing"
+      ]
     },
     {
       "slug": "snapchat-embed",
@@ -14401,19 +14407,6 @@
       ]
     },
     {
-      "slug": "social-media-icons-by-pb",
-      "name": "Social Share icon",
-      "url": "https://www.wix.com/app-market/web-solution/social-media-icons-by-pb",
-      "category": "marketing",
-      "discoveredFrom": "https://www.wix.com/app-market/category/marketing/social",
-      "page": 1,
-      "additionalCategories": [],
-      "discoveredFromPages": [
-        "https://www.wix.com/app-market/category/marketing/social",
-        "https://www.wix.com/app-market/category/marketing/social?page=2"
-      ]
-    },
-    {
       "slug": "page-speed-booster-ichonic",
       "name": "Page Speed Booster: Ichonic icon",
       "url": "https://www.wix.com/app-market/web-solution/page-speed-booster-ichonic",
@@ -14456,19 +14449,6 @@
       "slug": "simplesell",
       "name": "SimpleSell icon",
       "url": "https://www.wix.com/app-market/web-solution/simplesell",
-      "category": "ecommerce",
-      "discoveredFrom": "https://www.wix.com/app-market/category/ecommerce/shipping--delivery",
-      "page": 1,
-      "additionalCategories": [],
-      "discoveredFromPages": [
-        "https://www.wix.com/app-market/category/ecommerce/shipping--delivery",
-        "https://www.wix.com/app-market/category/ecommerce/shipping--delivery?page=2"
-      ]
-    },
-    {
-      "slug": "parcel-pro",
-      "name": "Parcel pro icon",
-      "url": "https://www.wix.com/app-market/web-solution/parcel-pro",
       "category": "ecommerce",
       "discoveredFrom": "https://www.wix.com/app-market/category/ecommerce/shipping--delivery",
       "page": 1,
@@ -14587,9 +14567,9 @@
       ]
     },
     {
-      "slug": "amazon-reviews",
-      "name": "Amazon Reviews by Certified Code icon",
-      "url": "https://www.wix.com/app-market/web-solution/amazon-reviews",
+      "slug": "ebay-reviews-by-pb",
+      "name": "Ebay Reviews Importer icon",
+      "url": "https://www.wix.com/app-market/web-solution/ebay-reviews-by-pb",
       "category": "communication",
       "discoveredFrom": "https://www.wix.com/app-market/category/communication/reviews--testimonials",
       "page": 1,
@@ -14600,9 +14580,9 @@
       ]
     }
   ],
-  "timestamp": "2025-07-06T23:43:41.197Z",
+  "timestamp": "2025-07-07T01:13:09.505Z",
   "discoveryMethods": {
     "sitemap": 1174,
-    "categories": 17
+    "categories": 15
   }
 }
