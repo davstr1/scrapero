@@ -1,0 +1,27 @@
+{
+  "name": "wix-roadmap",
+  "baseUrl": "https://support.wix.com/en/api/article/search",
+  "type": "api",
+  "rateLimit": {
+    "maxRequestsPerSecond": 2,
+    "maxConcurrency": 1
+  },
+  "http": {
+    "timeout": 30000,
+    "retries": 3,
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+      "Accept": "application/json"
+    }
+  },
+  "apiParams": {
+    "locale": "en",
+    "text": "+",
+    "pageSize": 500,
+    "useVespa": false,
+    "statuses": [10, 0],
+    "resolutions": [110, 111, 112, 114, 115, 116]
+  },
+  "outputs": ["csv", "json"],
+  "outputDir": "data/wix-roadmap"
+}

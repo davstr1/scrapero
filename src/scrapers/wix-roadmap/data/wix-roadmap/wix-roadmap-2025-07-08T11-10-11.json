@@ -1,0 +1,222 @@
+{
+  "metadata": {
+    "scrapeDate": "2025-07-08T11:10:12.790Z",
+    "totalItems": 10,
+    "resolutions": [
+      "Collecting votes",
+      "Launched"
+    ],
+    "categories": [
+      "Payments",
+      "Unknown (882000d1-ff14-4ca0-9962-7cda81af8915)",
+      "Unknown (e7d2cac6-75c5-4336-a954-16c17233ef92)",
+      "Unknown (f76d5554-2e4e-4d8b-bcc1-f14ea3ac8b6b)",
+      "Wix Audio",
+      "Wix Booking",
+      "Wix Stores",
+      "Wix restaurants"
+    ]
+  },
+  "items": [
+    {
+      "id": "b11f1af4-8dcb-4666-a453-bd31cae74cea",
+      "title": "Wix Restaurants Request: Setting Up Abandoned Cart Reminders",
+      "description": "Currently, it is not possible to set up an abandoned cart reminder in Wix Restaurants. This would allow automatic notifications to remind customers to complete their order.We are always working to upd...",
+      "url": "https://support.wix.com/en/article/wix-restaurants-setting-up-abandoned-cart-reminders",
+      "resolution": "Collecting votes",
+      "resolutionCode": 110,
+      "status": "Collecting votes",
+      "creationDate": "2024-12-26T13:02:17.000Z",
+      "readingTime": 1,
+      "categories": [
+        "Wix restaurants"
+      ],
+      "categoryIds": [
+        "d6dd504d-fd50-436a-af68-16b9e9477374"
+      ],
+      "type": 110,
+      "docType": "ANSWERS_ARTICLE"
+    },
+    {
+      "id": "e3cf17b1-f188-4be2-8817-9490315db514",
+      "title": "Request: Connecting LiqPay as a Payment Provider",
+      "description": "Currently, Wix does not offer LiqPay as a payment provider. If you use the Manual payment method, you can mention that you accept payments through LiqPay and arrange the payment offline.We are always ...",
+      "url": "https://support.wix.com/en/article/request-connecting-liqpay-as-a-payment-provider",
+      "resolution": "Collecting votes",
+      "resolutionCode": 110,
+      "status": "Collecting votes",
+      "creationDate": "2020-01-21T10:42:23.000Z",
+      "readingTime": 1,
+      "categories": [
+        "Payments"
+      ],
+      "categoryIds": [
+        "a76cff4c-9249-4974-b031-7f6e20b01668"
+      ],
+      "type": 110,
+      "docType": "ANSWERS_ARTICLE"
+    },
+    {
+      "id": "10a2b359-34b9-4036-af37-cd4a8b5b0366",
+      "title": "Wix Bookings Request: Allowing Single Tap Bookings on the Wix Mobile Apps",
+      "description": "We are excited to announce that it is now possible for clients to book a class session with a single tap when using your Wix mobile apps (Spaces by Wix, Fit by Wix, or your own native mobile app).To e...",
+      "url": "https://support.wix.com/en/article/wix-bookings-request-allowing-single-tap-bookings-on-the-wix-mobile-apps",
+      "resolution": "Launched",
+      "resolutionCode": 116,
+      "status": "Launched",
+      "creationDate": "2023-07-18T13:25:33.000Z",
+      "readingTime": 1,
+      "categories": [
+        "Wix Booking",
+        "Unknown (e7d2cac6-75c5-4336-a954-16c17233ef92)"
+      ],
+      "categoryIds": [
+        "ca8c47bc-ff69-4006-a0b7-b524906ecabe",
+        "e7d2cac6-75c5-4336-a954-16c17233ef92"
+      ],
+      "type": 110,
+      "docType": "ANSWERS_ARTICLE"
+    },
+    {
+      "id": "a75a985a-fd06-409c-add4-f89380952bed",
+      "title": "Wix Bookings Request: Displaying Past Sessions on the Agenda Widget in the Wix App",
+      "description": "Currently, the agenda widget in the Wix app only shows upcoming sessions. Adding the ability to display past sessions on the widget would provide a more comprehensive view of your schedule.This featur...",
+      "url": "https://support.wix.com/en/article/wix-bookings-request-displaying-past-sessions-on-the-agenda-widget-in-the-wix-app",
+      "resolution": "Collecting votes",
+      "resolutionCode": 110,
+      "status": "Collecting votes",
+      "creationDate": "2024-12-19T15:09:44.000Z",
+      "readingTime": 1,
+      "categories": [
+        "Wix Booking"
+      ],
+      "categoryIds": [
+        "ca8c47bc-ff69-4006-a0b7-b524906ecabe"
+      ],
+      "type": 110,
+      "docType": "ANSWERS_ARTICLE"
+    },
+    {
+      "id": "819eb60e-acb1-42e1-a031-8fd6c9637e69",
+      "title": "Wix Stores Request: Connecting to CJ Affiliate Marketing Network",
+      "description": "Currently, it's not possible to connect your Wix Store to CJ.com directly through the Wix dashboard, so that you can create shareable affiliate links for your products. We are always working to update...",
+      "url": "https://support.wix.com/en/article/wix-stores-request-connecting-to-cj-affiliate-marketing-network",
+      "resolution": "Collecting votes",
+      "resolutionCode": 110,
+      "status": "Collecting votes",
+      "creationDate": "2024-05-22T04:41:57.000Z",
+      "readingTime": 1,
+      "categories": [
+        "Wix Stores"
+      ],
+      "categoryIds": [
+        "b2cd4c53-c6c8-4287-865c-2187eb527871"
+      ],
+      "type": 110,
+      "docType": "ANSWERS_ARTICLE"
+    },
+    {
+      "id": "9c243647-6637-456c-b225-ce87b5eb58b1",
+      "title": "Wix Bookings Request: Sending SMS Notifications While Managing Sessions in the Wix App",
+      "description": "Currently, it is not possible to notify clients via SMS when scheduling, editing, or canceling a session from the Wix app. However, you can automatically send SMS reminders to members that they receiv...",
+      "url": "https://support.wix.com/en/article/wix-bookings-request-sending-sms-notifications-while-managing-sessions-in-the-wix-owner-app",
+      "resolution": "Collecting votes",
+      "resolutionCode": 110,
+      "status": "Collecting votes",
+      "creationDate": "2024-08-21T12:20:01.000Z",
+      "readingTime": 1,
+      "categories": [
+        "Wix Booking"
+      ],
+      "categoryIds": [
+        "ca8c47bc-ff69-4006-a0b7-b524906ecabe"
+      ],
+      "type": 110,
+      "docType": "ANSWERS_ARTICLE"
+    },
+    {
+      "id": "75f263f8-07ed-44fc-9831-57214383db67",
+      "title": "Request: Ability to Refund Orders Processed through Additional Payment Providers",
+      "description": "Important:This feature request is relevant for Wix Stores, Wix Bookings, and Wix Restaurants Orders (New).Currently, orders paid for through a few payment providers cannot be refunded in the Wix dashb...",
+      "url": "https://support.wix.com/en/article/request-ability-to-refund-orders-processed-through-additional-payment-providers",
+      "resolution": "Collecting votes",
+      "resolutionCode": 110,
+      "status": "Collecting votes",
+      "creationDate": "2019-03-06T14:48:36.000Z",
+      "readingTime": 1,
+      "categories": [
+        "Wix Booking",
+        "Wix restaurants",
+        "Wix Stores",
+        "Unknown (882000d1-ff14-4ca0-9962-7cda81af8915)"
+      ],
+      "categoryIds": [
+        "ca8c47bc-ff69-4006-a0b7-b524906ecabe",
+        "d6dd504d-fd50-436a-af68-16b9e9477374",
+        "b2cd4c53-c6c8-4287-865c-2187eb527871",
+        "882000d1-ff14-4ca0-9962-7cda81af8915"
+      ],
+      "type": 110,
+      "docType": "ANSWERS_ARTICLE"
+    },
+    {
+      "id": "de08fc3b-6543-482d-8e12-b0bb377fd5c8",
+      "title": "Wix Audio Request: Hosting Your Podcasts at Wix",
+      "description": "Currently, Wix does not have a feature which allows for hosting podcasts. We are always working to update and improve our products, and your feedback is greatly appreciated.Tip:You can link to your ex...",
+      "url": "https://support.wix.com/en/article/wix-audio-request-hosting-your-podcasts-at-wix",
+      "resolution": "Collecting votes",
+      "resolutionCode": 110,
+      "status": "Collecting votes",
+      "creationDate": "2019-10-18T19:53:32.000Z",
+      "readingTime": 1,
+      "categories": [
+        "Wix Audio",
+        "Unknown (f76d5554-2e4e-4d8b-bcc1-f14ea3ac8b6b)"
+      ],
+      "categoryIds": [
+        "dc7aa194-680b-452b-b36b-2abac9913fb5",
+        "f76d5554-2e4e-4d8b-bcc1-f14ea3ac8b6b"
+      ],
+      "type": 110,
+      "docType": "ANSWERS_ARTICLE"
+    },
+    {
+      "id": "46406f7e-a80c-48df-beaa-a367867d02a5",
+      "title": "Wix Bookings Request: Enabling Video Conferencing from the Wix App",
+      "description": "We are excited to announce that you can now enable video conferencing from the Wix app when creating or editing your appointments and classes.",
+      "url": "https://support.wix.com/en/article/wix-bookings-request-enabling-video-conferencing-from-the-wix-app",
+      "resolution": "Launched",
+      "resolutionCode": 116,
+      "status": "Launched",
+      "creationDate": "2024-05-02T12:38:25.000Z",
+      "readingTime": 1,
+      "categories": [
+        "Wix Booking"
+      ],
+      "categoryIds": [
+        "ca8c47bc-ff69-4006-a0b7-b524906ecabe"
+      ],
+      "type": 110,
+      "docType": "ANSWERS_ARTICLE"
+    },
+    {
+      "id": "d06af713-69b4-4e1d-aedb-9e171725ca8a",
+      "title": "Wix Stores Request: Letting Customers Select a Delivery Date from a Calendar",
+      "description": "We're thrilled to announce that now, when you set up scheduled delivery, your customers can select their preferred delivery date from a calendar.",
+      "url": "https://support.wix.com/en/article/wix-stores-request-letting-customers-select-a-delivery-date-from-a-calendar",
+      "resolution": "Launched",
+      "resolutionCode": 116,
+      "status": "Launched",
+      "creationDate": "2022-05-08T08:31:41.000Z",
+      "readingTime": 1,
+      "categories": [
+        "Wix Stores"
+      ],
+      "categoryIds": [
+        "b2cd4c53-c6c8-4287-865c-2187eb527871"
+      ],
+      "type": 110,
+      "docType": "ANSWERS_ARTICLE"
+    }
+  ]
+}
