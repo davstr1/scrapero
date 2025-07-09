@@ -1,7 +1,7 @@
 
 ```
 
-## User Commands (prefix with --):
+# User Commands (prefix with --):
 
 --GCP  
 Check git status then if any changes, add Commit and push all changes.
@@ -70,3 +70,116 @@ Don't touch the codebase, except for the one file specified (if any)  then --RIN
 --DUP
 --MIND, --GPC then search the codebase for duplicated and confusing code, that could perhaps be easily consolidated, simplified or grouped. --WD about your findings and how we could fix those and making this doc a safe heaven. Then --GPC and point us to the created doc
 
+
+
+# Scraper Development Field Guide
+
+## Using the BaseScraper Class
+
+All scrapers should extend the existing `BaseScraper` class located at:
+```
+src/scrapers/base/BaseScraper.ts
+```
+
+This provides common functionality like:
+- Configuration loading
+- Pipeline setup
+- Crawler initialization
+- Logging
+
+## Output Format & Naming Convention
+
+**Final outputs MUST be in CSV format.** You can use JSON, XML, or any format internally for processing, but what goes into the `outputs/` folder must be CSV.
+
+All scraper outputs go to a global `outputs/` folder with this naming format:
+```
+{datetime}-{state}-{scrapername}.csv
+```
+
+Examples:
+- `2025-07-08-141530-raw-wix-app-market.csv`
+- `2025-07-08-141530-processed-wordpress-plugins.csv`
+- `2025-07-08-141530-final-wix-roadmap.csv`
+
+Where:
+- **datetime**: YYYY-MM-DD-HHMMSS format
+- **state**: `raw`, `processed`, `final`, `partial`, etc.
+- **scrapername**: Your scraper's name (lowercase, hyphens)
+
+## Flexible Guidelines
+
+### Output Location
+- All outputs go to the global `outputs/` folder
+- Use the datetime-state-scrapername naming convention
+- Keep scraper directories clean - no data files inside
+
+### Temporary Files
+- Use a `.temp/` directory for work-in-progress files
+- Can store JSON, XML, or any format here for processing
+- Clean these up when done
+
+### Configuration
+- Each scraper needs a `config.json`
+- Document what your scraper does in a README.md
+
+### States You Can Use
+- `raw` - Direct from the source, unprocessed
+- `processed` - Cleaned up, deduplicated
+- `partial` - Incomplete scrape (stopped early)
+- `final` - Ready for use
+- `test` - Test runs with limited data
+
+## Simple Checklist
+
+When creating a new scraper:
+
+- [ ] Extend BaseScraper class
+- [ ] Output to `outputs/` folder 
+- [ ] Use datetime-state-scrapername format
+- [ ] Create a README.md
+- [ ] Add config.json
+- [ ] Clean up temp files when done
+
+## Field Documentation
+
+Document your output fields in README.md:
+
+```markdown
+## Output Fields
+
+| Field Name | Type | Description | Example |
+|------------|------|-------------|---------|
+| id | string | Unique identifier | "app-123" |
+| name | string | Display name | "My App" |
+| url | string | Product URL | "https://..." |
+| scraped_at | ISO 8601 | When scraped | "2025-07-08T14:15:30Z" |
+```
+
+## Example Usage
+
+```javascript
+// Extending BaseScraper (TypeScript)
+import { BaseScraper } from '../base/BaseScraper';
+
+class MyMarketplaceScraper extends BaseScraper {
+  // Your implementation
+}
+
+// Generate output filename
+const datetime = new Date().toISOString()
+  .replace(/[:.]/g, '-')
+  .replace('T', '-')
+  .slice(0, -5);
+const state = 'raw';
+const scraperName = 'my-marketplace';
+const outputFile = `outputs/${datetime}-${state}-${scraperName}.csv`;
+```
+
+## Key Points
+
+1. **Extend BaseScraper** - Don't reinvent the wheel
+2. **Use the naming convention** - `datetime-state-scrapername`
+3. **Keep it simple** - We're building MVPs, not enterprise software
+4. **Document your fields** - Help others understand your data
+
+Remember: Move fast, stay practical. This isn't enterprise - we're indiehackers building MVPs.
